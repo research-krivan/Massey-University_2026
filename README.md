@@ -18,4 +18,17 @@ The underlying MSCI/Property Council dataset is proprietary and is not included.
  
 ## Author
  
-Daniel Krivan
+A research report presented in partial fulfilment of the
+requirements for the degree of 
+	
+	Master of Business Studies
+	in
+	Finance
+
+	at Massey University,
+	New Zealand
+
+	Daniel James Krivan
+	
+	2026
+
