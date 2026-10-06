@@ -1,0 +1,10 @@
+,Mean,Median,Std Dev,Minimum,Maximum
+total_return,10.03,10.36,7.57,-13.66,32.69
+capital_return,2.64,2.88,7.04,-19.6,25.56
+income_return,7.22,7.31,1.5,3.88,10.76
+cap_rate,7.16,7.1,1.56,4.07,11.85
+discount_rate,9.39,9.21,2.23,5.56,15.78
+bond_10y,6.17,5.52,3.48,0.88,14.82
+cash_rate,4.42,4.75,2.48,0.1,14.0
+cap_rate_spread_bond,2.41,2.43,1.46,-1.94,5.43
+discount_rate_spread_bond,4.44,4.59,1.26,1.73,8.84
