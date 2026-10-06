@@ -1,0 +1,25 @@
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:          Half_Life_Yrs   R-squared:                       0.735
+Model:                            OLS   Adj. R-squared:                  0.705
+Method:                 Least Squares   F-statistic:                     24.95
+Date:                Fri, 21 Aug 2026   Prob (F-statistic):           0.000744
+Time:                        18:47:06   Log-Likelihood:                -28.235
+No. Observations:                  11   AIC:                             60.47
+Df Residuals:                       9   BIC:                             61.27
+Df Model:                           1                                         
+Covariance Type:            nonrobust                                         
+==============================================================================
+                 coef    std err          t      P>|t|      [0.025      0.975]
+------------------------------------------------------------------------------
+const         -2.9250      2.973     -0.984      0.351      -9.650       3.801
+Scarcity       4.0216      0.805      4.995      0.001       2.200       5.843
+==============================================================================
+Omnibus:                        3.730   Durbin-Watson:                   1.546
+Prob(Omnibus):                  0.155   Jarque-Bera (JB):                1.790
+Skew:                          -0.988   Prob(JB):                        0.409
+Kurtosis:                       3.010   Cond. No.                         11.1
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.

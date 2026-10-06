@@ -1,0 +1,2807 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": []
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "code",
+      "execution_count": 1,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "esEKN1eHDZLX",
+        "outputId": "08412076-c544-43f8-9bf1-6c400a3a447d"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Ready\n"
+          ]
+        }
+      ],
+      "source": [
+        "import pandas as pd\n",
+        "import numpy as np\n",
+        "import statsmodels.api as sm\n",
+        "\n",
+        "print(\"Ready\")"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from google.colab import files\n",
+        "\n",
+        "uploaded = files.upload()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 73
+        },
+        "id": "FyJLdaInDaSC",
+        "outputId": "311efb10-7ce2-4187-97e4-137804b34c10"
+      },
+      "execution_count": 2,
+      "outputs": [
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": [
+              "\n",
+              "     <input type=\"file\" id=\"files-e49dd6f0-2051-402a-9ac3-49693f2f38f2\" name=\"files[]\" multiple disabled\n",
+              "        style=\"border:none\" />\n",
+              "     <output id=\"result-e49dd6f0-2051-402a-9ac3-49693f2f38f2\">\n",
+              "      Upload widget is only available when the cell has been executed in the\n",
+              "      current browser session. Please rerun this cell to enable.\n",
+              "      </output>\n",
+              "      <script>// Copyright 2017 Google LLC\n",
+              "//\n",
+              "// Licensed under the Apache License, Version 2.0 (the \"License\");\n",
+              "// you may not use this file except in compliance with the License.\n",
+              "// You may obtain a copy of the License at\n",
+              "//\n",
+              "//      http://www.apache.org/licenses/LICENSE-2.0\n",
+              "//\n",
+              "// Unless required by applicable law or agreed to in writing, software\n",
+              "// distributed under the License is distributed on an \"AS IS\" BASIS,\n",
+              "// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n",
+              "// See the License for the specific language governing permissions and\n",
+              "// limitations under the License.\n",
+              "\n",
+              "/**\n",
+              " * @fileoverview Helpers for google.colab Python module.\n",
+              " */\n",
+              "(function(scope) {\n",
+              "function span(text, styleAttributes = {}) {\n",
+              "  const element = document.createElement('span');\n",
+              "  element.textContent = text;\n",
+              "  for (const key of Object.keys(styleAttributes)) {\n",
+              "    element.style[key] = styleAttributes[key];\n",
+              "  }\n",
+              "  return element;\n",
+              "}\n",
+              "\n",
+              "// Max number of bytes which will be uploaded at a time.\n",
+              "const MAX_PAYLOAD_SIZE = 100 * 1024;\n",
+              "\n",
+              "function _uploadFiles(inputId, outputId) {\n",
+              "  const steps = uploadFilesStep(inputId, outputId);\n",
+              "  const outputElement = document.getElementById(outputId);\n",
+              "  // Cache steps on the outputElement to make it available for the next call\n",
+              "  // to uploadFilesContinue from Python.\n",
+              "  outputElement.steps = steps;\n",
+              "\n",
+              "  return _uploadFilesContinue(outputId);\n",
+              "}\n",
+              "\n",
+              "// This is roughly an async generator (not supported in the browser yet),\n",
+              "// where there are multiple asynchronous steps and the Python side is going\n",
+              "// to poll for completion of each step.\n",
+              "// This uses a Promise to block the python side on completion of each step,\n",
+              "// then passes the result of the previous step as the input to the next step.\n",
+              "function _uploadFilesContinue(outputId) {\n",
+              "  const outputElement = document.getElementById(outputId);\n",
+              "  const steps = outputElement.steps;\n",
+              "\n",
+              "  const next = steps.next(outputElement.lastPromiseValue);\n",
+              "  return Promise.resolve(next.value.promise).then((value) => {\n",
+              "    // Cache the last promise value to make it available to the next\n",
+              "    // step of the generator.\n",
+              "    outputElement.lastPromiseValue = value;\n",
+              "    return next.value.response;\n",
+              "  });\n",
+              "}\n",
+              "\n",
+              "/**\n",
+              " * Generator function which is called between each async step of the upload\n",
+              " * process.\n",
+              " * @param {string} inputId Element ID of the input file picker element.\n",
+              " * @param {string} outputId Element ID of the output display.\n",
+              " * @return {!Iterable<!Object>} Iterable of next steps.\n",
+              " */\n",
+              "function* uploadFilesStep(inputId, outputId) {\n",
+              "  const inputElement = document.getElementById(inputId);\n",
+              "  inputElement.disabled = false;\n",
+              "\n",
+              "  const outputElement = document.getElementById(outputId);\n",
+              "  outputElement.innerHTML = '';\n",
+              "\n",
+              "  const pickedPromise = new Promise((resolve) => {\n",
+              "    inputElement.addEventListener('change', (e) => {\n",
+              "      resolve(e.target.files);\n",
+              "    });\n",
+              "  });\n",
+              "\n",
+              "  const cancel = document.createElement('button');\n",
+              "  inputElement.parentElement.appendChild(cancel);\n",
+              "  cancel.textContent = 'Cancel upload';\n",
+              "  const cancelPromise = new Promise((resolve) => {\n",
+              "    cancel.onclick = () => {\n",
+              "      resolve(null);\n",
+              "    };\n",
+              "  });\n",
+              "\n",
+              "  // Wait for the user to pick the files.\n",
+              "  const files = yield {\n",
+              "    promise: Promise.race([pickedPromise, cancelPromise]),\n",
+              "    response: {\n",
+              "      action: 'starting',\n",
+              "    }\n",
+              "  };\n",
+              "\n",
+              "  cancel.remove();\n",
+              "\n",
+              "  // Disable the input element since further picks are not allowed.\n",
+              "  inputElement.disabled = true;\n",
+              "\n",
+              "  if (!files) {\n",
+              "    return {\n",
+              "      response: {\n",
+              "        action: 'complete',\n",
+              "      }\n",
+              "    };\n",
+              "  }\n",
+              "\n",
+              "  for (const file of files) {\n",
+              "    const li = document.createElement('li');\n",
+              "    li.append(span(file.name, {fontWeight: 'bold'}));\n",
+              "    li.append(span(\n",
+              "        `(${file.type || 'n/a'}) - ${file.size} bytes, ` +\n",
+              "        `last modified: ${\n",
+              "            file.lastModifiedDate ? file.lastModifiedDate.toLocaleDateString() :\n",
+              "                                    'n/a'} - `));\n",
+              "    const percent = span('0% done');\n",
+              "    li.appendChild(percent);\n",
+              "\n",
+              "    outputElement.appendChild(li);\n",
+              "\n",
+              "    const fileDataPromise = new Promise((resolve) => {\n",
+              "      const reader = new FileReader();\n",
+              "      reader.onload = (e) => {\n",
+              "        resolve(e.target.result);\n",
+              "      };\n",
+              "      reader.readAsArrayBuffer(file);\n",
+              "    });\n",
+              "    // Wait for the data to be ready.\n",
+              "    let fileData = yield {\n",
+              "      promise: fileDataPromise,\n",
+              "      response: {\n",
+              "        action: 'continue',\n",
+              "      }\n",
+              "    };\n",
+              "\n",
+              "    // Use a chunked sending to avoid message size limits. See b/62115660.\n",
+              "    let position = 0;\n",
+              "    do {\n",
+              "      const length = Math.min(fileData.byteLength - position, MAX_PAYLOAD_SIZE);\n",
+              "      const chunk = new Uint8Array(fileData, position, length);\n",
+              "      position += length;\n",
+              "\n",
+              "      const base64 = btoa(String.fromCharCode.apply(null, chunk));\n",
+              "      yield {\n",
+              "        response: {\n",
+              "          action: 'append',\n",
+              "          file: file.name,\n",
+              "          data: base64,\n",
+              "        },\n",
+              "      };\n",
+              "\n",
+              "      let percentDone = fileData.byteLength === 0 ?\n",
+              "          100 :\n",
+              "          Math.round((position / fileData.byteLength) * 100);\n",
+              "      percent.textContent = `${percentDone}% done`;\n",
+              "\n",
+              "    } while (position < fileData.byteLength);\n",
+              "  }\n",
+              "\n",
+              "  // All done.\n",
+              "  yield {\n",
+              "    response: {\n",
+              "      action: 'complete',\n",
+              "    }\n",
+              "  };\n",
+              "}\n",
+              "\n",
+              "scope.google = scope.google || {};\n",
+              "scope.google.colab = scope.google.colab || {};\n",
+              "scope.google.colab._files = {\n",
+              "  _uploadFiles,\n",
+              "  _uploadFilesContinue,\n",
+              "};\n",
+              "})(self);\n",
+              "</script> "
+            ]
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Saving msci_research_dataset_v3.xlsx to msci_research_dataset_v3.xlsx\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df = pd.read_excel(\"msci_property_data.xlsx\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 287
+        },
+        "id": "uZpWmf8LDhya",
+        "outputId": "5e55a643-0ef9-4bed-9efb-2767376ffa66"
+      },
+      "execution_count": 3,
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "FileNotFoundError",
+          "evalue": "[Errno 2] No such file or directory: 'msci_property_data.xlsx'",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mFileNotFoundError\u001b[0m                         Traceback (most recent call last)",
+            "\u001b[0;32m/tmp/ipykernel_2554/2097417284.py\u001b[0m in \u001b[0;36m<cell line: 0>\u001b[0;34m()\u001b[0m\n\u001b[0;32m----> 1\u001b[0;31m \u001b[0mdf\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mpd\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mread_excel\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m\"msci_property_data.xlsx\"\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m",
+            "\u001b[0;32m/usr/local/lib/python3.13/dist-packages/pandas/io/excel/_base.py\u001b[0m in \u001b[0;36mread_excel\u001b[0;34m(io, sheet_name, header, names, index_col, usecols, dtype, engine, converters, true_values, false_values, skiprows, nrows, na_values, keep_default_na, na_filter, verbose, parse_dates, date_parser, date_format, thousands, decimal, comment, skipfooter, storage_options, dtype_backend, engine_kwargs)\u001b[0m\n\u001b[1;32m    493\u001b[0m     \u001b[0;32mif\u001b[0m \u001b[0;32mnot\u001b[0m \u001b[0misinstance\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mio\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mExcelFile\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    494\u001b[0m         \u001b[0mshould_close\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0;32mTrue\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--> 495\u001b[0;31m         io = ExcelFile(\n\u001b[0m\u001b[1;32m    496\u001b[0m             \u001b[0mio\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    497\u001b[0m             \u001b[0mstorage_options\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mstorage_options\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/usr/local/lib/python3.13/dist-packages/pandas/io/excel/_base.py\u001b[0m in \u001b[0;36m__init__\u001b[0;34m(self, path_or_buffer, engine, storage_options, engine_kwargs)\u001b[0m\n\u001b[1;32m   1548\u001b[0m                 \u001b[0mext\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0;34m\"xls\"\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   1549\u001b[0m             \u001b[0;32melse\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m-> 1550\u001b[0;31m                 ext = inspect_excel_format(\n\u001b[0m\u001b[1;32m   1551\u001b[0m                     \u001b[0mcontent_or_path\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mpath_or_buffer\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mstorage_options\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mstorage_options\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   1552\u001b[0m                 )\n",
+            "\u001b[0;32m/usr/local/lib/python3.13/dist-packages/pandas/io/excel/_base.py\u001b[0m in \u001b[0;36minspect_excel_format\u001b[0;34m(content_or_path, storage_options)\u001b[0m\n\u001b[1;32m   1400\u001b[0m         \u001b[0mcontent_or_path\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mBytesIO\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mcontent_or_path\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   1401\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m-> 1402\u001b[0;31m     with get_handle(\n\u001b[0m\u001b[1;32m   1403\u001b[0m         \u001b[0mcontent_or_path\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m\"rb\"\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mstorage_options\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mstorage_options\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mis_text\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;32mFalse\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   1404\u001b[0m     ) as handle:\n",
+            "\u001b[0;32m/usr/local/lib/python3.13/dist-packages/pandas/io/common.py\u001b[0m in \u001b[0;36mget_handle\u001b[0;34m(path_or_buf, mode, encoding, compression, memory_map, is_text, errors, storage_options)\u001b[0m\n\u001b[1;32m    880\u001b[0m         \u001b[0;32melse\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    881\u001b[0m             \u001b[0;31m# Binary mode\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--> 882\u001b[0;31m             \u001b[0mhandle\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mopen\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mhandle\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mioargs\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mmode\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m    883\u001b[0m         \u001b[0mhandles\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mappend\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mhandle\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    884\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;31mFileNotFoundError\u001b[0m: [Errno 2] No such file or directory: 'msci_property_data.xlsx'"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df = pd.read_excel(\"msci_research_dataset_v3.xlsx\")"
+      ],
+      "metadata": {
+        "id": "hoeNPb5XDsh3"
+      },
+      "execution_count": 4,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import pandas as pd\n",
+        "\n",
+        "df = pd.read_excel(\"msci_research_dataset_v3.xlsx\")\n",
+        "\n",
+        "print(df.head())\n",
+        "\n",
+        "print(\"\\nColumns:\")\n",
+        "print(df.columns.tolist())"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "i6LmmiIYD2kX",
+        "outputId": "88c3a170-0664-4f46-b76f-2b99fb60d067"
+      },
+      "execution_count": 5,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "  quarter_end      sector  total_return  capital_return  income_return  \\\n",
+            "0  1985-12-01  Industrial     14.753422        6.211565       8.084208   \n",
+            "1  1986-03-01  Industrial     15.954124        6.794845       8.625343   \n",
+            "2  1986-06-01  Industrial     16.367541        7.225124       8.578112   \n",
+            "3  1986-09-01  Industrial     17.133640        7.556796       8.960349   \n",
+            "4  1986-12-01  Industrial     17.209568        7.706414       8.880107   \n",
+            "\n",
+            "   capital_value_m  num_investments  cap_rate  discount_rate  year  ...  \\\n",
+            "0       255.164609               49       NaN            NaN  1985  ...   \n",
+            "1       259.752100               49       NaN            NaN  1986  ...   \n",
+            "2       328.465496               63       NaN            NaN  1986  ...   \n",
+            "3       334.334900               63       NaN            NaN  1986  ...   \n",
+            "4       391.922357               70       NaN            NaN  1986  ...   \n",
+            "\n",
+            "   investment_growth_yoy log_capital_value  return_check  return_difference  \\\n",
+            "0                    NaN          5.541909     14.295772           0.457650   \n",
+            "1                    NaN          5.559728     15.420188           0.533936   \n",
+            "2                    NaN          5.794432     15.803236           0.564306   \n",
+            "3                    NaN          5.812143     16.517145           0.616495   \n",
+            "4               0.428571          5.971064     16.586521           0.623047   \n",
+            "\n",
+            "   return_check_geometric  return_difference_geometric  cash_rate   bond_10y  \\\n",
+            "0               14.797928                    -0.044506        NaN  14.816667   \n",
+            "1               16.006266                    -0.052142        NaN  13.466667   \n",
+            "2               16.423015                    -0.055474        NaN  12.616667   \n",
+            "3               17.194260                    -0.060620        NaN  14.050000   \n",
+            "4               17.270858                    -0.061291        NaN  13.533333   \n",
+            "\n",
+            "   cap_rate_spread_bond  discount_rate_spread_bond  \n",
+            "0                   NaN                        NaN  \n",
+            "1                   NaN                        NaN  \n",
+            "2                   NaN                        NaN  \n",
+            "3                   NaN                        NaN  \n",
+            "4                   NaN                        NaN  \n",
+            "\n",
+            "[5 rows x 25 columns]\n",
+            "\n",
+            "Columns:\n",
+            "['quarter_end', 'sector', 'total_return', 'capital_return', 'income_return', 'capital_value_m', 'num_investments', 'cap_rate', 'discount_rate', 'year', 'quarter', 'quarter_label', 'cap_rate_spread', 'capital_value_growth_qoq', 'capital_value_growth_yoy', 'investment_growth_yoy', 'log_capital_value', 'return_check', 'return_difference', 'return_check_geometric', 'return_difference_geometric', 'cash_rate', 'bond_10y', 'cap_rate_spread_bond', 'discount_rate_spread_bond']\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import pandas as pd\n",
+        "import numpy as np\n",
+        "\n",
+        "# Load file\n",
+        "df = pd.read_excel(\"msci_research_dataset_v3.xlsx\")\n",
+        "\n",
+        "# Convert date\n",
+        "df[\"quarter_end\"] = pd.to_datetime(df[\"quarter_end\"])\n",
+        "\n",
+        "# Sort panel\n",
+        "df = df.sort_values([\"sector\", \"quarter_end\"])"
+      ],
+      "metadata": {
+        "id": "nY9b7sKlD4F5"
+      },
+      "execution_count": 6,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(df.columns.tolist())"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "GkzA3XFeD9Pu",
+        "outputId": "1734aa57-ac1b-4917-bb68-39ebaf355e27"
+      },
+      "execution_count": 7,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "['quarter_end', 'sector', 'total_return', 'capital_return', 'income_return', 'capital_value_m', 'num_investments', 'cap_rate', 'discount_rate', 'year', 'quarter', 'quarter_label', 'cap_rate_spread', 'capital_value_growth_qoq', 'capital_value_growth_yoy', 'investment_growth_yoy', 'log_capital_value', 'return_check', 'return_difference', 'return_check_geometric', 'return_difference_geometric', 'cash_rate', 'bond_10y', 'cap_rate_spread_bond', 'discount_rate_spread_bond']\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(df[\"sector\"].unique())\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "ihAwQgndD_Ht",
+        "outputId": "ba9c7766-5d99-4907-d97f-8db524624f24"
+      },
+      "execution_count": 8,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "['Industrial' 'Office' 'Retail']\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "xls = pd.ExcelFile(\"msci_research_dataset_v3.xlsx\")\n",
+        "\n",
+        "print(xls.sheet_names)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "zLatZKUaEFON",
+        "outputId": "a925351b-b668-4ae8-ce77-11d39a4eb266"
+      },
+      "execution_count": 9,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "['Analysis_Master', 'Benchmark_Weights', 'Return_Attribution', 'Valuation_Summary', 'Bond_10Y_Quarterly', 'Cash_Rate_Quarterly']\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "benchmark = pd.read_excel(\n",
+        "    \"msci_research_dataset_v3.xlsx\",\n",
+        "    sheet_name=\"Benchmark_Weights\"\n",
+        ")\n",
+        "\n",
+        "print(benchmark.head())\n",
+        "print(benchmark.columns.tolist())\n",
+        "`"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 106
+        },
+        "id": "2HmLg0T4EMEd",
+        "outputId": "0129efd9-22a5-4235-cbc0-6b3659b864b6"
+      },
+      "execution_count": 10,
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "SyntaxError",
+          "evalue": "invalid syntax (3707982930.py, line 8)",
+          "traceback": [
+            "\u001b[0;36m  File \u001b[0;32m\"/tmp/ipykernel_2554/3707982930.py\"\u001b[0;36m, line \u001b[0;32m8\u001b[0m\n\u001b[0;31m    `\u001b[0m\n\u001b[0m    ^\u001b[0m\n\u001b[0;31mSyntaxError\u001b[0m\u001b[0;31m:\u001b[0m invalid syntax\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "benchmark = pd.read_excel(\n",
+        "    \"msci_research_dataset_v3.xlsx\",\n",
+        "    sheet_name=\"Benchmark_Weights\"\n",
+        ")\n",
+        "\n",
+        "print(benchmark.head())\n",
+        "print(benchmark.columns.tolist())\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "M45kTv1nERPK",
+        "outputId": "1ee1469c-09c8-4f08-c204-7868e16381ea"
+      },
+      "execution_count": 11,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "  quarter_end  Industrial  Office  Retail  weight_sum\n",
+            "0  1985-12-01        3.97   69.40   26.64         1.0\n",
+            "1  1986-03-01        3.85   70.12   26.03         1.0\n",
+            "2  1986-06-01        3.89   71.20   24.91         1.0\n",
+            "3  1986-09-01        3.86   71.31   24.83         1.0\n",
+            "4  1986-12-01        3.91   70.05   26.04         1.0\n",
+            "['quarter_end', 'Industrial', 'Office', 'Retail', 'weight_sum']\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "attrib = pd.read_excel(\n",
+        "    \"msci_research_dataset_v3.xlsx\",\n",
+        "    sheet_name=\"Return_Attribution\"\n",
+        ")\n",
+        "\n",
+        "print(attrib.head())\n",
+        "print(attrib.columns.tolist())"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "ARdEOhfIETGv",
+        "outputId": "53a5a1b4-058b-45ad-bae9-30034b54e088"
+      },
+      "execution_count": 12,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "       sector  observations  avg_total_return  avg_capital_return  \\\n",
+            "0  Industrial           162             11.25                3.17   \n",
+            "1      Office           162              8.44                1.73   \n",
+            "2      Retail           162             10.39                3.01   \n",
+            "\n",
+            "   avg_income_return  income_share  capital_share  \n",
+            "0               7.89          0.70           0.28  \n",
+            "1               6.62          0.78           0.20  \n",
+            "2               7.16          0.69           0.29  \n",
+            "['sector', 'observations', 'avg_total_return', 'avg_capital_return', 'avg_income_return', 'income_share', 'capital_share']\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Create market-value weights\n",
+        "df[\"weight\"] = (\n",
+        "    df.groupby(\"quarter_end\")[\"capital_value_m\"]\n",
+        "      .transform(lambda x: x / x.sum())\n",
+        ")\n",
+        "\n",
+        "# Benchmark return\n",
+        "benchmark = (\n",
+        "    df.groupby(\"quarter_end\")\n",
+        "      .apply(\n",
+        "          lambda x:\n",
+        "          (x[\"total_return\"] * x[\"weight\"]).sum()\n",
+        "      )\n",
+        "      .reset_index(name=\"benchmark_return\")\n",
+        ")\n",
+        "\n",
+        "# Merge back\n",
+        "df = df.merge(\n",
+        "    benchmark,\n",
+        "    on=\"quarter_end\",\n",
+        "    how=\"left\"\n",
+        ")\n",
+        "\n",
+        "# Excess return\n",
+        "df[\"ER\"] = (\n",
+        "    df[\"total_return\"]\n",
+        "    - df[\"benchmark_return\"]\n",
+        ")\n",
+        "\n",
+        "print(\n",
+        "    df[\n",
+        "        [\n",
+        "            \"quarter_end\",\n",
+        "            \"sector\",\n",
+        "            \"total_return\",\n",
+        "            \"benchmark_return\",\n",
+        "            \"ER\"\n",
+        "        ]\n",
+        "    ].head(10)\n",
+        ")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "znC5M06JEVit",
+        "outputId": "89c92a16-f178-449e-b3b1-55d4bf9bd7bf"
+      },
+      "execution_count": 13,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "  quarter_end      sector  total_return  benchmark_return        ER\n",
+            "0  1985-12-01  Industrial     14.753422         16.024201 -1.270779\n",
+            "1  1986-03-01  Industrial     15.954124         16.596139 -0.642015\n",
+            "2  1986-06-01  Industrial     16.367541         16.943642 -0.576101\n",
+            "3  1986-09-01  Industrial     17.133640         17.727357 -0.593717\n",
+            "4  1986-12-01  Industrial     17.209568         18.286398 -1.076831\n",
+            "5  1987-03-01  Industrial     17.519418         19.698149 -2.178731\n",
+            "6  1987-06-01  Industrial     17.947634         21.126014 -3.178379\n",
+            "7  1987-09-01  Industrial     18.150044         23.818815 -5.668770\n",
+            "8  1987-12-01  Industrial     18.380742         26.300268 -7.919527\n",
+            "9  1988-03-01  Industrial     20.004413         28.472684 -8.468272\n"
+          ]
+        },
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "/tmp/ipykernel_2554/343345735.py:10: DeprecationWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.\n",
+            "  .apply(\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(\n",
+        "    df.groupby(\"sector\")[\"ER\"]\n",
+        "      .describe()\n",
+        "      [[\"mean\",\"std\",\"min\",\"max\"]]\n",
+        ")\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "tNzmuD6zEbh8",
+        "outputId": "bf25091b-aadb-4b68-f2ac-4d9e49efc1c8"
+      },
+      "execution_count": 14,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "                mean       std        min        max\n",
+            "sector                                              \n",
+            "Industrial  1.760306  4.212005  -8.906335  18.112463\n",
+            "Office     -1.042869  2.844763  -9.013457   5.692221\n",
+            "Retail      0.900524  4.741237 -11.814177  14.202316\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from statsmodels.tsa.stattools import adfuller\n",
+        "\n",
+        "for sector in df[\"sector\"].unique():\n",
+        "\n",
+        "    series = (\n",
+        "        df[df[\"sector\"] == sector]\n",
+        "        [\"ER\"]\n",
+        "        .dropna()\n",
+        "    )\n",
+        "\n",
+        "    result = adfuller(\n",
+        "        series,\n",
+        "        autolag=\"AIC\"\n",
+        "    )\n",
+        "\n",
+        "    print(\n",
+        "        f\"\\n{sector}\"\n",
+        "    )\n",
+        "\n",
+        "    print(\n",
+        "        f\"ADF Statistic = {result.4f}\"\n",
+        "    )\n",
+        "\n",
+        "    print(\n",
+        "        f\"p-value = {result.4f}\"\n",
+        "    )"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 106
+        },
+        "id": "RJZzXvTmElH0",
+        "outputId": "38e23dd0-e7cd-4c3f-80d9-a0f124d44c56"
+      },
+      "execution_count": 15,
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "SyntaxError",
+          "evalue": "invalid decimal literal (3391823541.py, line 21)",
+          "traceback": [
+            "\u001b[0;36m  File \u001b[0;32m\"/tmp/ipykernel_2554/3391823541.py\"\u001b[0;36m, line \u001b[0;32m21\u001b[0m\n\u001b[0;31m    f\"ADF Statistic = {result.4f}\"\u001b[0m\n\u001b[0m                              ^\u001b[0m\n\u001b[0;31mSyntaxError\u001b[0m\u001b[0;31m:\u001b[0m invalid decimal literal\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from statsmodels.tsa.stattools import adfuller\n",
+        "\n",
+        "for sector in df[\"sector\"].unique():\n",
+        "\n",
+        "    series = (\n",
+        "        df[df[\"sector\"] == sector]\n",
+        "        [\"ER\"]\n",
+        "        .dropna()\n",
+        "    )\n",
+        "\n",
+        "    result = adfuller(\n",
+        "        series,\n",
+        "        autolag=\"AIC\"\n",
+        "    )\n",
+        "\n",
+        "    print(f\"\\n{sector}\")\n",
+        "    print(f\"ADF Statistic = {result[0]:.4f    print(f\"p-value = {result.4f}\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 106
+        },
+        "id": "gONyy09sExL4",
+        "outputId": "0d79cb1d-445f-4642-a3f9-a7c8cd434e80"
+      },
+      "execution_count": 16,
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "SyntaxError",
+          "evalue": "invalid decimal literal (1159467927.py, line 17)",
+          "traceback": [
+            "\u001b[0;36m  File \u001b[0;32m\"/tmp/ipykernel_2554/1159467927.py\"\u001b[0;36m, line \u001b[0;32m17\u001b[0m\n\u001b[0;31m    print(f\"ADF Statistic = {result[0]:.4f    print(f\"p-value = {result.4f}\")\u001b[0m\n\u001b[0m                                                                        ^\u001b[0m\n\u001b[0;31mSyntaxError\u001b[0m\u001b[0;31m:\u001b[0m invalid decimal literal\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from statsmodels.tsa.stattools import adfuller\n",
+        "\n",
+        "adf_results = []\n",
+        "\n",
+        "for sector in df[\"sector\"].unique():\n",
+        "\n",
+        "    series = (\n",
+        "        df[df[\"sector\"] == sector]\n",
+        "        [\"ER\"]\n",
+        "        .dropna()\n",
+        "    )\n",
+        "\n",
+        "    result = adfuller(\n",
+        "        series,\n",
+        "        autolag=\"AIC\"\n",
+        "    )\n",
+        "\n",
+        "    adf_results.append(\n",
+        "        [\n",
+        "            sector,\n",
+        "            result[0],\n",
+        "            result[1]\n",
+        "        ]\n",
+        "    )\n",
+        "\n",
+        "adf_table = pd.DataFrame(\n",
+        "    adf_results,\n",
+        "    columns=[\n",
+        "        \"Sector\",\n",
+        "        \"ADF Statistic\",\n",
+        "        \"p-value\"\n",
+        "    ]\n",
+        ")\n",
+        "\n",
+        "print(adf_table.round(4))"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "gDDydOYZE3DF",
+        "outputId": "207999c6-859e-42c0-eb1b-18b2cee14dd6"
+      },
+      "execution_count": 17,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "       Sector  ADF Statistic  p-value\n",
+            "0  Industrial        -3.1694   0.0218\n",
+            "1      Office        -3.0004   0.0349\n",
+            "2      Retail        -3.0918   0.0272\n"
+          ]
+        },
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "/tmp/ipykernel_2554/3784616383.py:13: FutureWarning: adfuller currently returns a plain tuple whose length depends on the store and autolag arguments. In release 0.16 or after July 2027, whichever is later, the default behavior will switch to always returning an ADFullerResult. Set result_object=True to switch now, or result_object=False to keep the current behavior and silence this warning.\n",
+            "  result = adfuller(\n",
+            "/tmp/ipykernel_2554/3784616383.py:13: FutureWarning: adfuller currently returns a plain tuple whose length depends on the store and autolag arguments. In release 0.16 or after July 2027, whichever is later, the default behavior will switch to always returning an ADFullerResult. Set result_object=True to switch now, or result_object=False to keep the current behavior and silence this warning.\n",
+            "  result = adfuller(\n",
+            "/tmp/ipykernel_2554/3784616383.py:13: FutureWarning: adfuller currently returns a plain tuple whose length depends on the store and autolag arguments. In release 0.16 or after July 2027, whichever is later, the default behavior will switch to always returning an ADFullerResult. Set result_object=True to switch now, or result_object=False to keep the current behavior and silence this warning.\n",
+            "  result = adfuller(\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from statsmodels.tsa.ar_model import AutoReg\n",
+        "import pandas as pd\n",
+        "import numpy as np\n",
+        "\n",
+        "results = []\n",
+        "\n",
+        "for sector in df[\"sector\"].unique():\n",
+        "\n",
+        "    s = (\n",
+        "        df[df[\"sector\"] == sector]\n",
+        "        [\"ER\"]\n",
+        "        .dropna()\n",
+        "    )\n",
+        "\n",
+        "    model = AutoReg(\n",
+        "        s,\n",
+        "        lags=1,\n",
+        "        old_names=False\n",
+        "    ).fit()\n",
+        "\n",
+        "    rho = model.params.iloc[1]\n",
+        "\n",
+        "    if 0 < rho < 1:\n",
+        "        half_life = np.log(0.5) / np.log(rho)\n",
+        "    else:\n",
+        "        half_life = np.nan\n",
+        "\n",
+        "    results.append([\n",
+        "        sector,\n",
+        "        rho,\n",
+        "        model.pvalues.iloc[1],\n",
+        "        half_life\n",
+        "    ])\n",
+        "\n",
+        "ar1_table = pd.DataFrame(\n",
+        "    results,\n",
+        "    columns=[\n",
+        "        \"Sector\",\n",
+        "        \"AR1_Coefficient\",\n",
+        "        \"p_value\",\n",
+        "        \"Half_Life_Quarters\"\n",
+        "    ]\n",
+        ")\n",
+        "\n",
+        "print(ar1_table.round(4))"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 211
+        },
+        "id": "qbu90ig6E6EU",
+        "outputId": "14bdcd3a-fe12-44ab-991e-b1613352d236"
+      },
+      "execution_count": 18,
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "TypeError",
+          "evalue": "AutoReg.__init__() got an unexpected keyword argument 'old_names'",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mTypeError\u001b[0m                                 Traceback (most recent call last)",
+            "\u001b[0;32m/tmp/ipykernel_2554/516196871.py\u001b[0m in \u001b[0;36m<cell line: 0>\u001b[0;34m()\u001b[0m\n\u001b[1;32m     13\u001b[0m     )\n\u001b[1;32m     14\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m---> 15\u001b[0;31m     model = AutoReg(\n\u001b[0m\u001b[1;32m     16\u001b[0m         \u001b[0ms\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     17\u001b[0m         \u001b[0mlags\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;36m1\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;31mTypeError\u001b[0m: AutoReg.__init__() got an unexpected keyword argument 'old_names'"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from statsmodels.tsa.ar_model import AutoReg\n",
+        "import pandas as pd\n",
+        "import numpy as np\n",
+        "\n",
+        "results = []\n",
+        "\n",
+        "for sector in df[\"sector\"].unique():\n",
+        "\n",
+        "    s = (\n",
+        "        df[df[\"sector\"] == sector]\n",
+        "        [\"ER\"]\n",
+        "        .dropna()\n",
+        "    )\n",
+        "\n",
+        "    model = AutoReg(\n",
+        "        s,\n",
+        "        lags=1\n",
+        "    ).fit()\n",
+        "\n",
+        "    rho = model.params.iloc[1]\n",
+        "\n",
+        "    if 0 < rho < 1:\n",
+        "        half_life = np.log(0.5) / np.log(rho)\n",
+        "    else:\n",
+        "        half_life = np.nan\n",
+        "\n",
+        "    results.append([\n",
+        "        sector,\n",
+        "        rho,\n",
+        "        model.pvalues.iloc[1],\n",
+        "        half_life\n",
+        "    ])\n",
+        "\n",
+        "ar1_table = pd.DataFrame(\n",
+        "    results,\n",
+        "    columns=[\n",
+        "        \"Sector\",\n",
+        "        \"AR1_Coefficient\",\n",
+        "        \"p_value\",\n",
+        "        \"Half_Life_Quarters\"\n",
+        "    ]\n",
+        ")\n",
+        "\n",
+        "print(ar1_table.round(4))"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "9W1wQMAjFA_m",
+        "outputId": "1d62daac-5d74-451a-9df5-8d37acbf2d91"
+      },
+      "execution_count": 19,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "       Sector  AR1_Coefficient  p_value  Half_Life_Quarters\n",
+            "0  Industrial           0.9661      0.0             20.0742\n",
+            "1      Office           0.9695      0.0             22.3717\n",
+            "2      Retail           0.9767      0.0             29.4603\n"
+          ]
+        },
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "/usr/local/lib/python3.13/dist-packages/statsmodels/tsa/base/tsa_model.py:480: ValueWarning: An unsupported index was provided. As a result, forecasts cannot be generated. To use the model for forecasting, use on the supported classes of index.\n",
+            "  self._init_dates(dates, freq)\n",
+            "/usr/local/lib/python3.13/dist-packages/statsmodels/tsa/base/tsa_model.py:480: ValueWarning: An unsupported index was provided. As a result, forecasts cannot be generated. To use the model for forecasting, use on the supported classes of index.\n",
+            "  self._init_dates(dates, freq)\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "for sector in df[\"sector\"].unique():\n",
+        "\n",
+        "    s = (\n",
+        "        df[df[\"sector\"] == sector]\n",
+        "        [\"ER\"]\n",
+        "        .dropna()\n",
+        "    )\n",
+        "\n",
+        "    print(\"\\n\", sector)\n",
+        "    print(s.describe())"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "SevQ9xdJFF3j",
+        "outputId": "5da2fb7c-78d8-4f57-b79f-2c0178768788"
+      },
+      "execution_count": 20,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "\n",
+            " Industrial\n",
+            "count    162.000000\n",
+            "mean       1.760306\n",
+            "std        4.212005\n",
+            "min       -8.906335\n",
+            "25%       -0.589313\n",
+            "50%        1.244345\n",
+            "75%        3.991774\n",
+            "max       18.112463\n",
+            "Name: ER, dtype: float64\n",
+            "\n",
+            " Office\n",
+            "count    162.000000\n",
+            "mean      -1.042869\n",
+            "std        2.844763\n",
+            "min       -9.013457\n",
+            "25%       -2.561366\n",
+            "50%       -0.709713\n",
+            "75%        0.493465\n",
+            "max        5.692221\n",
+            "Name: ER, dtype: float64\n",
+            "\n",
+            " Retail\n",
+            "count    162.000000\n",
+            "mean       0.900524\n",
+            "std        4.741237\n",
+            "min      -11.814177\n",
+            "25%       -1.259124\n",
+            "50%        0.268844\n",
+            "75%        2.635347\n",
+            "max       14.202316\n",
+            "Name: ER, dtype: float64\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "for sector in df[\"sector\"].unique():\n",
+        "\n",
+        "    s = df[df[\"sector\"] == sector][\"total_return\"]\n",
+        "\n",
+        "    print(\n",
+        "        sector,\n",
+        "        \"\\nMean:\",\n",
+        "        round(s.mean(),2),\n",
+        "        \"\\nMin:\",\n",
+        "        round(s.min(),2),\n",
+        "        \"\\nMax:\",\n",
+        "        round(s.max(),2),\n",
+        "        \"\\n\"\n",
+        "    )"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "BBOSsD48FMYc",
+        "outputId": "c1dad51e-4a3b-412d-895c-40617bda38ca"
+      },
+      "execution_count": 21,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Industrial \n",
+            "Mean: 11.25 \n",
+            "Min: -8.72 \n",
+            "Max: 30.46 \n",
+            "\n",
+            "Office \n",
+            "Mean: 8.44 \n",
+            "Min: -13.66 \n",
+            "Max: 32.69 \n",
+            "\n",
+            "Retail \n",
+            "Mean: 10.39 \n",
+            "Min: -9.98 \n",
+            "Max: 24.32 \n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from statsmodels.tsa.ar_model import AutoReg\n",
+        "import pandas as pd\n",
+        "\n",
+        "lag_selection = []\n",
+        "\n",
+        "for sector in df[\"sector\"].unique():\n",
+        "\n",
+        "    s = (\n",
+        "        df[df[\"sector\"] == sector]\n",
+        "        [\"ER\"]\n",
+        "        .dropna()\n",
+        "    )\n",
+        "\n",
+        "    for lag in range(1, 13):\n",
+        "\n",
+        "        model = AutoReg(\n",
+        "            s,\n",
+        "            lags=lag\n",
+        "        ).fit()\n",
+        "\n",
+        "        lag_selection.append([\n",
+        "            sector,\n",
+        "            lag,\n",
+        "            model.aic,\n",
+        "            model.bic,\n",
+        "            model.hqic\n",
+        "        ])\n",
+        "\n",
+        "lag_df = pd.DataFrame(\n",
+        "    lag_selection,\n",
+        "    columns=[\n",
+        "        \"Sector\",\n",
+        "        \"Lag\",\n",
+        "        \"AIC\",\n",
+        "        \"BIC\",\n",
+        "        \"HQIC\"\n",
+        "    ]\n",
+        ")\n",
+        "\n",
+        "print(lag_df)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "7Y6ZuQDIFSZf",
+        "outputId": "070a20d0-5b35-4e43-e72b-28d26dbf53bd"
+      },
+      "execution_count": 22,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "        Sector  Lag         AIC         BIC        HQIC\n",
+            "0   Industrial    1  483.492796  492.737009  487.246322\n",
+            "1   Industrial    2  427.306613  439.607308  432.301499\n",
+            "2   Industrial    3  426.338655  441.683176  432.569902\n",
+            "3   Industrial    4  425.958229  444.333799  433.420780\n",
+            "4   Industrial    5  417.856472  439.250193  426.545212\n",
+            "5   Industrial    6  409.664437  434.063286  419.574193\n",
+            "6   Industrial    7  408.779472  436.170298  419.905010\n",
+            "7   Industrial    8  398.057154  428.426680  410.393180\n",
+            "8   Industrial    9  385.712361  419.047178  399.253516\n",
+            "9   Industrial   10  366.548513  402.835079  381.289377\n",
+            "10  Industrial   11  350.253523  389.478161  366.188609\n",
+            "11  Industrial   12  347.910956  390.059850  365.034712\n",
+            "12      Office    1  347.818919  357.063132  351.572445\n",
+            "13      Office    2  237.330531  249.631226  242.325417\n",
+            "14      Office    3  238.682337  254.026858  244.913583\n",
+            "15      Office    4  238.296068  256.671638  245.758618\n",
+            "16      Office    5  231.699555  253.093275  240.388295\n",
+            "17      Office    6  214.348792  238.747640  224.258548\n",
+            "18      Office    7  212.904216  240.295042  224.029754\n",
+            "19      Office    8  210.160183  240.529709  222.496208\n",
+            "20      Office    9  211.273409  244.608226  224.814564\n",
+            "21      Office   10  210.571831  246.858397  225.312694\n",
+            "22      Office   11  211.844089  251.068727  227.779175\n",
+            "23      Office   12  212.802759  254.951653  229.926515\n",
+            "24      Retail    1  464.354343  473.598556  468.107869\n",
+            "25      Retail    2  349.201537  361.502233  354.196424\n",
+            "26      Retail    3  349.337076  364.681597  355.568323\n",
+            "27      Retail    4  347.869886  366.245456  355.332437\n",
+            "28      Retail    5  346.197029  367.590749  354.885769\n",
+            "29      Retail    6  319.379426  343.778274  329.289182\n",
+            "30      Retail    7  316.350043  343.740869  327.475581\n",
+            "31      Retail    8  303.886128  334.255654  316.222153\n",
+            "32      Retail    9  304.521598  337.856416  318.062753\n",
+            "33      Retail   10  303.511677  339.798244  318.252541\n",
+            "34      Retail   11  302.956747  342.181385  318.891833\n",
+            "35      Retail   12  296.789806  338.938700  313.913562\n"
+          ]
+        },
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "/usr/local/lib/python3.13/dist-packages/statsmodels/tsa/base/tsa_model.py:480: ValueWarning: An unsupported index was provided. As a result, forecasts cannot be generated. To use the model for forecasting, use on the supported classes of index.\n",
+            "  self._init_dates(dates, freq)\n",
+            "/usr/local/lib/python3.13/dist-packages/statsmodels/tsa/base/tsa_model.py:480: ValueWarning: An unsupported index was provided. As a result, forecasts cannot be generated. To use the model for forecasting, use on the supported classes of index.\n",
+            "  self._init_dates(dates, freq)\n",
+            "/usr/local/lib/python3.13/dist-packages/statsmodels/tsa/base/tsa_model.py:480: ValueWarning: An unsupported index was provided. As a result, forecasts cannot be generated. To use the model for forecasting, use on the supported classes of index.\n",
+            "  self._init_dates(dates, freq)\n",
+            "/usr/local/lib/python3.13/dist-packages/statsmodels/tsa/base/tsa_model.py:480: ValueWarning: An unsupported index was provided. As a result, forecasts cannot be generated. To use the model for forecasting, use on the supported classes of index.\n",
+            "  self._init_dates(dates, freq)\n",
+            "/usr/local/lib/python3.13/dist-packages/statsmodels/tsa/base/tsa_model.py:480: ValueWarning: An unsupported index was provided. As a result, forecasts cannot be generated. To use the model for forecasting, use on the supported classes of index.\n",
+            "  self._init_dates(dates, freq)\n",
+            "/usr/local/lib/python3.13/dist-packages/statsmodels/tsa/base/tsa_model.py:480: ValueWarning: An unsupported index was provided. As a result, forecasts cannot be generated. To use the model for forecasting, use on the supported classes of index.\n",
+            "  self._init_dates(dates, freq)\n",
+            "/usr/local/lib/python3.13/dist-packages/statsmodels/tsa/base/tsa_model.py:480: ValueWarning: An unsupported index was provided. As a result, forecasts cannot be generated. To use the model for forecasting, use on the supported classes of index.\n",
+            "  self._init_dates(dates, freq)\n",
+            "/usr/local/lib/python3.13/dist-packages/statsmodels/tsa/base/tsa_model.py:480: ValueWarning: An unsupported index was provided. As a result, forecasts cannot be generated. To use the model for forecasting, use on the supported classes of index.\n",
+            "  self._init_dates(dates, freq)\n",
+            "/usr/local/lib/python3.13/dist-packages/statsmodels/tsa/base/tsa_model.py:480: ValueWarning: An unsupported index was provided. As a result, forecasts cannot be generated. To use the model for forecasting, use on the supported classes of index.\n",
+            "  self._init_dates(dates, freq)\n",
+            "/usr/local/lib/python3.13/dist-packages/statsmodels/tsa/base/tsa_model.py:480: ValueWarning: An unsupported index was provided. As a result, forecasts cannot be generated. To use the model for forecasting, use on the supported classes of index.\n",
+            "  self._init_dates(dates, freq)\n",
+            "/usr/local/lib/python3.13/dist-packages/statsmodels/tsa/base/tsa_model.py:480: ValueWarning: An unsupported index was provided. As a result, forecasts cannot be generated. To use the model for forecasting, use on the supported classes of index.\n",
+            "  self._init_dates(dates, freq)\n",
+            "/usr/local/lib/python3.13/dist-packages/statsmodels/tsa/base/tsa_model.py:480: ValueWarning: An unsupported index was provided. As a result, forecasts cannot be generated. To use the model for forecasting, use on the supported classes of index.\n",
+            "  self._init_dates(dates, freq)\n",
+            "/usr/local/lib/python3.13/dist-packages/statsmodels/tsa/base/tsa_model.py:480: ValueWarning: An unsupported index was provided. As a result, forecasts cannot be generated. To use the model for forecasting, use on the supported classes of index.\n",
+            "  self._init_dates(dates, freq)\n",
+            "/usr/local/lib/python3.13/dist-packages/statsmodels/tsa/base/tsa_model.py:480: ValueWarning: An unsupported index was provided. As a result, forecasts cannot be generated. To use the model for forecasting, use on the supported classes of index.\n",
+            "  self._init_dates(dates, freq)\n",
+            "/usr/local/lib/python3.13/dist-packages/statsmodels/tsa/base/tsa_model.py:480: ValueWarning: An unsupported index was provided. As a result, forecasts cannot be generated. To use the model for forecasting, use on the supported classes of index.\n",
+            "  self._init_dates(dates, freq)\n",
+            "/usr/local/lib/python3.13/dist-packages/statsmodels/tsa/base/tsa_model.py:480: ValueWarning: An unsupported index was provided. As a result, forecasts cannot be generated. To use the model for forecasting, use on the supported classes of index.\n",
+            "  self._init_dates(dates, freq)\n",
+            "/usr/local/lib/python3.13/dist-packages/statsmodels/tsa/base/tsa_model.py:480: ValueWarning: An unsupported index was provided. As a result, forecasts cannot be generated. To use the model for forecasting, use on the supported classes of index.\n",
+            "  self._init_dates(dates, freq)\n",
+            "/usr/local/lib/python3.13/dist-packages/statsmodels/tsa/base/tsa_model.py:480: ValueWarning: An unsupported index was provided. As a result, forecasts cannot be generated. To use the model for forecasting, use on the supported classes of index.\n",
+            "  self._init_dates(dates, freq)\n",
+            "/usr/local/lib/python3.13/dist-packages/statsmodels/tsa/base/tsa_model.py:480: ValueWarning: An unsupported index was provided. As a result, forecasts cannot be generated. To use the model for forecasting, use on the supported classes of index.\n",
+            "  self._init_dates(dates, freq)\n",
+            "/usr/local/lib/python3.13/dist-packages/statsmodels/tsa/base/tsa_model.py:480: ValueWarning: An unsupported index was provided. As a result, forecasts cannot be generated. To use the model for forecasting, use on the supported classes of index.\n",
+            "  self._init_dates(dates, freq)\n",
+            "/usr/local/lib/python3.13/dist-packages/statsmodels/tsa/base/tsa_model.py:480: ValueWarning: An unsupported index was provided. As a result, forecasts cannot be generated. To use the model for forecasting, use on the supported classes of index.\n",
+            "  self._init_dates(dates, freq)\n",
+            "/usr/local/lib/python3.13/dist-packages/statsmodels/tsa/base/tsa_model.py:480: ValueWarning: An unsupported index was provided. As a result, forecasts cannot be generated. To use the model for forecasting, use on the supported classes of index.\n",
+            "  self._init_dates(dates, freq)\n",
+            "/usr/local/lib/python3.13/dist-packages/statsmodels/tsa/base/tsa_model.py:480: ValueWarning: An unsupported index was provided. As a result, forecasts cannot be generated. To use the model for forecasting, use on the supported classes of index.\n",
+            "  self._init_dates(dates, freq)\n",
+            "/usr/local/lib/python3.13/dist-packages/statsmodels/tsa/base/tsa_model.py:480: ValueWarning: An unsupported index was provided. As a result, forecasts cannot be generated. To use the model for forecasting, use on the supported classes of index.\n",
+            "  self._init_dates(dates, freq)\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(\n",
+        "    lag_df.loc[\n",
+        "        lag_df.groupby(\"Sector\")[\"AIC\"].idxmin()\n",
+        "    ]\n",
+        ")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "AJeDXNDEFcE8",
+        "outputId": "e0e8f5ef-0fc2-43de-f807-4eb377313df0"
+      },
+      "execution_count": 23,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "        Sector  Lag         AIC         BIC        HQIC\n",
+            "11  Industrial   12  347.910956  390.059850  365.034712\n",
+            "19      Office    8  210.160183  240.529709  222.496208\n",
+            "35      Retail   12  296.789806  338.938700  313.913562\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "for sector in df[\"sector\"].unique():\n",
+        "\n",
+        "    s = (\n",
+        "        df[df[\"sector\"] == sector]\n",
+        "        [\"ER\"]\n",
+        "        .dropna()\n",
+        "    )\n",
+        "\n",
+        "    model = AutoReg(\n",
+        "        s,\n",
+        "        lags={\n",
+        "            \"Industrial\":12,\n",
+        "            \"Office\":8,\n",
+        "            \"Retail\":12\n",
+        "        }[sector]\n",
+        "    ).fit()\n",
+        "\n",
+        "    print(\"\\n\")\n",
+        "    print(sector)\n",
+        "    print(model.summary())"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "5q3feFP7FgSv",
+        "outputId": "a274e94f-bd9a-420f-a5ca-c3239289ab74"
+      },
+      "execution_count": 24,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "\n",
+            "\n",
+            "Industrial\n",
+            "                            AutoReg Model Results                             \n",
+            "==============================================================================\n",
+            "Dep. Variable:                     ER   No. Observations:                  150\n",
+            "Model:                    AutoReg(12)   Log Likelihood                -159.955\n",
+            "Method:               Conditional MLE   S.D. of innovations              0.703\n",
+            "Date:                Tue, 15 Sep 2026   AIC                            347.911\n",
+            "Time:                        08:02:07   BIC                            390.060\n",
+            "Sample:                            12   HQIC                           365.035\n",
+            "                                  162                                         \n",
+            "==============================================================================\n",
+            "                 coef    std err          z      P>|z|      [0.025      0.975]\n",
+            "------------------------------------------------------------------------------\n",
+            "const          0.1316      0.067      1.962      0.050       0.000       0.263\n",
+            "ER.L1          1.4100      0.081     17.453      0.000       1.252       1.568\n",
+            "ER.L2         -0.0826      0.134     -0.615      0.538      -0.346       0.181\n",
+            "ER.L3         -0.4391      0.134     -3.281      0.001      -0.701      -0.177\n",
+            "ER.L4         -0.4701      0.127     -3.700      0.000      -0.719      -0.221\n",
+            "ER.L5          0.7857      0.131      5.988      0.000       0.529       1.043\n",
+            "ER.L6          0.1412      0.140      1.011      0.312      -0.132       0.415\n",
+            "ER.L7         -0.5388      0.140     -3.841      0.000      -0.814      -0.264\n",
+            "ER.L8         -0.3402      0.131     -2.603      0.009      -0.596      -0.084\n",
+            "ER.L9          0.6879      0.130      5.303      0.000       0.434       0.942\n",
+            "ER.L10         0.1492      0.136      1.098      0.272      -0.117       0.416\n",
+            "ER.L11        -0.4766      0.136     -3.498      0.000      -0.744      -0.210\n",
+            "ER.L12         0.1151      0.080      1.445      0.148      -0.041       0.271\n",
+            "                                    Roots                                     \n",
+            "==============================================================================\n",
+            "                   Real          Imaginary           Modulus         Frequency\n",
+            "------------------------------------------------------------------------------\n",
+            "AR.1            -0.4916           -0.9295j            1.0515           -0.3274\n",
+            "AR.2            -0.4916           +0.9295j            1.0515            0.3274\n",
+            "AR.3            -0.9404           -0.5909j            1.1106           -0.4107\n",
+            "AR.4            -0.9404           +0.5909j            1.1106            0.4107\n",
+            "AR.5            -1.2784           -0.0000j            1.2784           -0.5000\n",
+            "AR.6             0.4852           -0.9290j            1.0480           -0.1734\n",
+            "AR.7             0.4852           +0.9290j            1.0480            0.1734\n",
+            "AR.8             0.9366           -0.5673j            1.0950           -0.0867\n",
+            "AR.9             0.9366           +0.5673j            1.0950            0.0867\n",
+            "AR.10            1.0596           -0.1304j            1.0676           -0.0195\n",
+            "AR.11            1.0596           +0.1304j            1.0676            0.0195\n",
+            "AR.12            3.3188           -0.0000j            3.3188           -0.0000\n",
+            "------------------------------------------------------------------------------\n",
+            "\n",
+            "\n",
+            "Office\n",
+            "                            AutoReg Model Results                             \n",
+            "==============================================================================\n",
+            "Dep. Variable:                     ER   No. Observations:                  154\n",
+            "Model:                     AutoReg(8)   Log Likelihood                 -95.080\n",
+            "Method:               Conditional MLE   S.D. of innovations              0.449\n",
+            "Date:                Tue, 15 Sep 2026   AIC                            210.160\n",
+            "Time:                        08:02:07   BIC                            240.530\n",
+            "Sample:                             8   HQIC                           222.496\n",
+            "                                  162                                         \n",
+            "==============================================================================\n",
+            "                 coef    std err          z      P>|z|      [0.025      0.975]\n",
+            "------------------------------------------------------------------------------\n",
+            "const         -0.0596      0.039     -1.516      0.130      -0.137       0.017\n",
+            "ER.L1          1.6689      0.079     20.999      0.000       1.513       1.825\n",
+            "ER.L2         -0.5371      0.153     -3.514      0.000      -0.837      -0.238\n",
+            "ER.L3         -0.2078      0.159     -1.305      0.192      -0.520       0.104\n",
+            "ER.L4         -0.4587      0.156     -2.941      0.003      -0.764      -0.153\n",
+            "ER.L5          0.7582      0.160      4.743      0.000       0.445       1.072\n",
+            "ER.L6         -0.0152      0.171     -0.089      0.929      -0.350       0.320\n",
+            "ER.L7         -0.4151      0.167     -2.489      0.013      -0.742      -0.088\n",
+            "ER.L8          0.1574      0.086      1.820      0.069      -0.012       0.327\n",
+            "                                    Roots                                    \n",
+            "=============================================================================\n",
+            "                  Real          Imaginary           Modulus         Frequency\n",
+            "-----------------------------------------------------------------------------\n",
+            "AR.1           -0.7120           -0.8835j            1.1347           -0.3580\n",
+            "AR.2           -0.7120           +0.8835j            1.1347            0.3580\n",
+            "AR.3           -1.5379           -0.0000j            1.5379           -0.5000\n",
+            "AR.4            0.7854           -0.8829j            1.1817           -0.1343\n",
+            "AR.5            0.7854           +0.8829j            1.1817            0.1343\n",
+            "AR.6            1.1112           -0.1942j            1.1281           -0.0275\n",
+            "AR.7            1.1112           +0.1942j            1.1281            0.0275\n",
+            "AR.8            1.8056           -0.0000j            1.8056           -0.0000\n",
+            "-----------------------------------------------------------------------------\n",
+            "\n",
+            "\n",
+            "Retail\n",
+            "                            AutoReg Model Results                             \n",
+            "==============================================================================\n",
+            "Dep. Variable:                     ER   No. Observations:                  150\n",
+            "Model:                    AutoReg(12)   Log Likelihood                -134.395\n",
+            "Method:               Conditional MLE   S.D. of innovations              0.593\n",
+            "Date:                Tue, 15 Sep 2026   AIC                            296.790\n",
+            "Time:                        08:02:07   BIC                            338.939\n",
+            "Sample:                            12   HQIC                           313.914\n",
+            "                                  162                                         \n",
+            "==============================================================================\n",
+            "                 coef    std err          z      P>|z|      [0.025      0.975]\n",
+            "------------------------------------------------------------------------------\n",
+            "const          0.0429      0.050      0.857      0.392      -0.055       0.141\n",
+            "ER.L1          1.6506      0.080     20.643      0.000       1.494       1.807\n",
+            "ER.L2         -0.3898      0.154     -2.538      0.011      -0.691      -0.089\n",
+            "ER.L3         -0.5151      0.156     -3.313      0.001      -0.820      -0.210\n",
+            "ER.L4         -0.1955      0.160     -1.218      0.223      -0.510       0.119\n",
+            "ER.L5          0.8249      0.160      5.156      0.000       0.511       1.138\n",
+            "ER.L6         -0.1150      0.167     -0.690      0.490      -0.441       0.211\n",
+            "ER.L7         -0.6137      0.167     -3.685      0.000      -0.940      -0.287\n",
+            "ER.L8          0.2939      0.161      1.824      0.068      -0.022       0.610\n",
+            "ER.L9          0.1901      0.162      1.173      0.241      -0.128       0.508\n",
+            "ER.L10        -0.2420      0.157     -1.539      0.124      -0.550       0.066\n",
+            "ER.L11         0.0338      0.155      0.218      0.828      -0.271       0.338\n",
+            "ER.L12         0.0390      0.080      0.487      0.626      -0.118       0.196\n",
+            "                                    Roots                                     \n",
+            "==============================================================================\n",
+            "                   Real          Imaginary           Modulus         Frequency\n",
+            "------------------------------------------------------------------------------\n",
+            "AR.1             1.0666           -0.1885j            1.0831           -0.0278\n",
+            "AR.2             1.0666           +0.1885j            1.0831            0.0278\n",
+            "AR.3             1.2501           -0.0000j            1.2501           -0.0000\n",
+            "AR.4             0.8055           -0.8625j            1.1802           -0.1304\n",
+            "AR.5             0.8055           +0.8625j            1.1802            0.1304\n",
+            "AR.6             0.5842           -1.1849j            1.3211           -0.1771\n",
+            "AR.7             0.5842           +1.1849j            1.3211            0.1771\n",
+            "AR.8            -0.6700           -0.8706j            1.0985           -0.3544\n",
+            "AR.9            -0.6700           +0.8706j            1.0985            0.3544\n",
+            "AR.10           -1.3309           -0.4425j            1.4025           -0.4489\n",
+            "AR.11           -1.3309           +0.4425j            1.4025            0.4489\n",
+            "AR.12           -3.0269           -0.0000j            3.0269           -0.5000\n",
+            "------------------------------------------------------------------------------\n"
+          ]
+        },
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "/usr/local/lib/python3.13/dist-packages/statsmodels/tsa/base/tsa_model.py:480: ValueWarning: An unsupported index was provided. As a result, forecasts cannot be generated. To use the model for forecasting, use on the supported classes of index.\n",
+            "  self._init_dates(dates, freq)\n",
+            "/usr/local/lib/python3.13/dist-packages/statsmodels/tsa/base/tsa_model.py:480: ValueWarning: An unsupported index was provided. As a result, forecasts cannot be generated. To use the model for forecasting, use on the supported classes of index.\n",
+            "  self._init_dates(dates, freq)\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "check = df[\n",
+        "    [\n",
+        "        \"quarter_end\",\n",
+        "        \"sector\",\n",
+        "        \"total_return\",\n",
+        "        \"income_return\",\n",
+        "        \"capital_return\"\n",
+        "    ]\n",
+        "].copy()\n",
+        "\n",
+        "print(\n",
+        "    check[\n",
+        "        check[\"sector\"] == \"Industrial\"\n",
+        "    ].head(12).to_string(index=False)\n",
+        ")\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "ZufQE-drFmpV",
+        "outputId": "e2f3e870-1d91-42b9-f3cf-33b0e662e507"
+      },
+      "execution_count": 25,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "quarter_end     sector  total_return  income_return  capital_return\n",
+            " 1985-12-01 Industrial     14.753422       8.084208        6.211565\n",
+            " 1986-03-01 Industrial     15.954124       8.625343        6.794845\n",
+            " 1986-06-01 Industrial     16.367541       8.578112        7.225124\n",
+            " 1986-09-01 Industrial     17.133640       8.960349        7.556796\n",
+            " 1986-12-01 Industrial     17.209568       8.880107        7.706414\n",
+            " 1987-03-01 Industrial     17.519418       8.379861        8.491230\n",
+            " 1987-06-01 Industrial     17.947634       7.927141        9.345560\n",
+            " 1987-09-01 Industrial     18.150044       7.459737       10.010149\n",
+            " 1987-12-01 Industrial     18.380742       7.021395       10.677131\n",
+            " 1988-03-01 Industrial     20.004413       7.265506       11.950453\n",
+            " 1988-06-01 Industrial     21.531987       7.500994       13.136848\n",
+            " 1988-09-01 Industrial     22.292785       7.869492       13.461643\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "acf_results = []\n",
+        "\n",
+        "for sector in df[\"sector\"].unique():\n",
+        "\n",
+        "    s = (\n",
+        "        df.loc[df[\"sector\"] == sector, \"ER\"]\n",
+        "        .dropna()\n",
+        "        .reset_index(drop=True)\n",
+        "    )\n",
+        "\n",
+        "    acf_results.append({\n",
+        "        \"Sector\": sector,\n",
+        "        \"Lag 1\": s.autocorr(1),\n",
+        "        \"Lag 2\": s.autocorr(2),\n",
+        "        \"Lag 3\": s.autocorr(3),\n",
+        "        \"Lag 4\": s.autocorr(4),\n",
+        "        \"Lag 8\": s.autocorr(8),\n",
+        "        \"Lag 12\": s.autocorr(12)\n",
+        "    })\n",
+        "\n",
+        "acf_table = pd.DataFrame(acf_results)\n",
+        "print(acf_table.round(4))"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "WV8X1RQUFxZ0",
+        "outputId": "52fcbf3b-142e-4c02-93fd-a18906679b29"
+      },
+      "execution_count": 26,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "       Sector   Lag 1   Lag 2   Lag 3   Lag 4   Lag 8  Lag 12\n",
+            "0  Industrial  0.9673  0.9008  0.8154  0.7254  0.4491  0.2678\n",
+            "1      Office  0.9693  0.8967  0.7975  0.6872  0.3024 -0.0362\n",
+            "2      Retail  0.9773  0.9228  0.8461  0.7577  0.3763  0.0244\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df[\"calculated_total_return\"] = (\n",
+        "    (1 + df[\"income_return\"] / 100)\n",
+        "    * (1 + df[\"capital_return\"] / 100)\n",
+        "    - 1\n",
+        ") * 100\n",
+        "\n",
+        "df[\"return_gap\"] = (\n",
+        "    df[\"total_return\"]\n",
+        "    - df[\"calculated_total_return\"]\n",
+        ")\n",
+        "\n",
+        "print(\n",
+        "    df[\n",
+        "        [\n",
+        "            \"quarter_end\",\n",
+        "            \"sector\",\n",
+        "            \"total_return\",\n",
+        "            \"calculated_total_return\",\n",
+        "            \"return_gap\"\n",
+        "        ]\n",
+        "    ].head(12).round(4)\n",
+        ")\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "9MR_mFjLFzxZ",
+        "outputId": "d486220c-439d-4e26-c8a6-4e8b2c6fc596"
+      },
+      "execution_count": 27,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "   quarter_end      sector  total_return  calculated_total_return  return_gap\n",
+            "0   1985-12-01  Industrial       14.7534                  14.7979     -0.0445\n",
+            "1   1986-03-01  Industrial       15.9541                  16.0063     -0.0521\n",
+            "2   1986-06-01  Industrial       16.3675                  16.4230     -0.0555\n",
+            "3   1986-09-01  Industrial       17.1336                  17.1943     -0.0606\n",
+            "4   1986-12-01  Industrial       17.2096                  17.2709     -0.0613\n",
+            "5   1987-03-01  Industrial       17.5194                  17.5826     -0.0632\n",
+            "6   1987-06-01  Industrial       17.9476                  18.0135     -0.0659\n",
+            "7   1987-09-01  Industrial       18.1500                  18.2166     -0.0666\n",
+            "8   1987-12-01  Industrial       18.3807                  18.4482     -0.0675\n",
+            "9   1988-03-01  Industrial       20.0044                  20.0842     -0.0798\n",
+            "10  1988-06-01  Industrial       21.5320                  21.6232     -0.0913\n",
+            "11  1988-09-01  Industrial       22.2928                  22.3905     -0.0977\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "acf_results = []\n",
+        "\n",
+        "for sector in df[\"sector\"].unique():\n",
+        "\n",
+        "    s = (\n",
+        "        df.loc[df[\"sector\"] == sector, \"ER\"]\n",
+        "        .dropna()\n",
+        "        .reset_index(drop=True)\n",
+        "    )\n",
+        "\n",
+        "    acf_results.append({\n",
+        "        \"Sector\": sector,\n",
+        "        \"Lag_1\": s.autocorr(1),\n",
+        "        \"Lag_2\": s.autocorr(2),\n",
+        "        \"Lag_3\": s.autocorr(3),\n",
+        "        \"Lag_4\": s.autocorr(4),\n",
+        "        \"Lag_8\": s.autocorr(8),\n",
+        "        \"Lag_12\": s.autocorr(12)\n",
+        "    })\n",
+        "\n",
+        "acf_table = pd.DataFrame(acf_results)\n",
+        "\n",
+        "print(acf_table.round(4))"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "GHkD9pBqF6Hn",
+        "outputId": "6363a678-d10a-4e10-de67-f0b7733632c0"
+      },
+      "execution_count": 28,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "       Sector   Lag_1   Lag_2   Lag_3   Lag_4   Lag_8  Lag_12\n",
+            "0  Industrial  0.9673  0.9008  0.8154  0.7254  0.4491  0.2678\n",
+            "1      Office  0.9693  0.8967  0.7975  0.6872  0.3024 -0.0362\n",
+            "2      Retail  0.9773  0.9228  0.8461  0.7577  0.3763  0.0244\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "nonoverlap_results = []\n",
+        "\n",
+        "for sector in df[\"sector\"].unique():\n",
+        "\n",
+        "    sector_df = (\n",
+        "        df[df[\"sector\"] == sector]\n",
+        "        .sort_values(\"quarter_end\")\n",
+        "        .copy()\n",
+        "    )\n",
+        "\n",
+        "    # Keep the December observation each year\n",
+        "    annual = (\n",
+        "        sector_df[\n",
+        "            sector_df[\"quarter_end\"].dt.month == 12\n",
+        "        ][\"ER\"]\n",
+        "        .dropna()\n",
+        "        .reset_index(drop=True)\n",
+        "    )\n",
+        "\n",
+        "    nonoverlap_results.append({\n",
+        "        \"Sector\": sector,\n",
+        "        \"Observations\": len(annual),\n",
+        "        \"Lag_1\": annual.autocorr(1),\n",
+        "        \"Lag_2\": annual.autocorr(2),\n",
+        "        \"Lag_3\": annual.autocorr(3)\n",
+        "    })\n",
+        "\n",
+        "nonoverlap_acf = pd.DataFrame(nonoverlap_results)\n",
+        "\n",
+        "print(nonoverlap_acf.round(4))"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "xrHVQ3MNF9Kq",
+        "outputId": "ca165f42-de46-4360-cdbf-e19d87b36b76"
+      },
+      "execution_count": 29,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "       Sector  Observations   Lag_1   Lag_2   Lag_3\n",
+            "0  Industrial            41  0.6707  0.3931  0.3086\n",
+            "1      Office            41  0.6677  0.2808 -0.0234\n",
+            "2      Retail            41  0.7628  0.3609  0.0129\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "annual_ar1_results = []\n",
+        "\n",
+        "for sector in df[\"sector\"].unique():\n",
+        "\n",
+        "    annual = (\n",
+        "        df[\n",
+        "            (df[\"sector\"] == sector) &\n",
+        "            (df[\"quarter_end\"].dt.month == 12)\n",
+        "        ]\n",
+        "        .sort_values(\"quarter_end\")[\"ER\"]\n",
+        "        .dropna()\n",
+        "        .reset_index(drop=True)\n",
+        "    )\n",
+        "\n",
+        "    model = AutoReg(\n",
+        "        annual,\n",
+        "        lags=1,\n",
+        "        trend=\"ct\"\n",
+        "    ).fit()\n",
+        "\n",
+        "    rho = model.params.iloc[2]\n",
+        "\n",
+        "    if 0 < rho < 1:\n",
+        "        half_life_years = np.log(0.5) / np.log(rho)\n",
+        "    else:\n",
+        "        half_life_years = np.nan\n",
+        "\n",
+        "    annual_ar1_results.append({\n",
+        "        \"Sector\": sector,\n",
+        "        \"Annual_AR1\": rho,\n",
+        "        \"p_value\": model.pvalues.iloc[2],\n",
+        "        \"Half_Life_Years\": half_life_years\n",
+        "    })\n",
+        "\n",
+        "annual_ar1_table = pd.DataFrame(annual_ar1_results)\n",
+        "\n",
+        "print(annual_ar1_table.round(4))"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "uDcgByrLGDVk",
+        "outputId": "993f5525-99a9-4931-d4d7-708578170e17"
+      },
+      "execution_count": 30,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "       Sector  Annual_AR1  p_value  Half_Life_Years\n",
+            "0  Industrial      0.6021      0.0           1.3662\n",
+            "1      Office      0.6561      0.0           1.6446\n",
+            "2      Retail      0.7208      0.0           2.1174\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "annual_ar1_results = []\n",
+        "\n",
+        "for sector in df[\"sector\"].unique():\n",
+        "\n",
+        "    annual = (\n",
+        "        df[\n",
+        "            (df[\"sector\"] == sector) &\n",
+        "            (df[\"quarter_end\"].dt.month == 12)\n",
+        "        ]\n",
+        "        .sort_values(\"quarter_end\")[\"ER\"]\n",
+        "        .dropna()\n",
+        "        .reset_index(drop=True)\n",
+        "    )\n",
+        "\n",
+        "    model = AutoReg(\n",
+        "        annual,\n",
+        "        lags=1,\n",
+        "        trend=\"c\"\n",
+        "    ).fit()\n",
+        "\n",
+        "    rho = model.params.iloc[1]\n",
+        "\n",
+        "    half_life_years = (\n",
+        "        np.log(0.5) / np.log(rho)\n",
+        "        if 0 < rho < 1\n",
+        "        else np.nan\n",
+        "    )\n",
+        "\n",
+        "    annual_ar1_results.append({\n",
+        "        \"Sector\": sector,\n",
+        "        \"Observations\": model.nobs,\n",
+        "        \"Annual_AR1\": rho,\n",
+        "        \"Standard_Error\": model.bse.iloc[1],\n",
+        "        \"p_value\": model.pvalues.iloc[1],\n",
+        "        \"CI_Lower_95\": model.conf_int().iloc[1, 0],\n",
+        "        \"CI_Upper_95\": model.conf_int().iloc[1, 1],\n",
+        "        \"Half_Life_Years\": half_life_years\n",
+        "    })\n",
+        "\n",
+        "annual_ar1_table = pd.DataFrame(annual_ar1_results)\n",
+        "\n",
+        "print(annual_ar1_table.round(4))"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "-u8A5HtkGF28",
+        "outputId": "9260ad40-6c8a-4e93-987f-413b6393202e"
+      },
+      "execution_count": 31,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "       Sector  Observations  Annual_AR1  Standard_Error  p_value  CI_Lower_95  \\\n",
+            "0  Industrial            40      0.6669          0.1166      0.0       0.4383   \n",
+            "1      Office            40      0.6682          0.1178      0.0       0.4373   \n",
+            "2      Retail            40      0.7609          0.1020      0.0       0.5610   \n",
+            "\n",
+            "   CI_Upper_95  Half_Life_Years  \n",
+            "0       0.8955           1.7110  \n",
+            "1       0.8991           1.7193  \n",
+            "2       0.9608           2.5365  \n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import statsmodels.formula.api as smf\n",
+        "\n",
+        "# Construct non-overlapping annual panel\n",
+        "annual_panel = (\n",
+        "    df[df[\"quarter_end\"].dt.month == 12]\n",
+        "    .sort_values([\"sector\", \"quarter_end\"])\n",
+        "    .copy()\n",
+        ")\n",
+        "\n",
+        "# Sector-specific lag\n",
+        "annual_panel[\"ER_L1\"] = (\n",
+        "    annual_panel.groupby(\"sector\")[\"ER\"]\n",
+        "    .shift(1)\n",
+        ")\n",
+        "\n",
+        "annual_panel = annual_panel.dropna(\n",
+        "    subset=[\"ER\", \"ER_L1\"]\n",
+        ")\n",
+        "\n",
+        "# Industrial is the reference sector\n",
+        "h2_model = smf.ols(\n",
+        "    \"\"\"\n",
+        "    ER ~ C(sector, Treatment(reference=\"Industrial\"))\n",
+        "       + ER_L1\n",
+        "       + ER_L1:C(sector, Treatment(reference=\"Industrial\"))\n",
+        "    \"\"\",\n",
+        "    data=annual_panel\n",
+        ").fit(\n",
+        "    cov_type=\"HAC\",\n",
+        "    cov_kwds={\"maxlags\": 1}\n",
+        ")\n",
+        "\n",
+        "print(h2_model.summary())"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "_Q_ZhT-VGMqR",
+        "outputId": "5794cd6c-a28a-48ce-824f-07dc5040fc0e"
+      },
+      "execution_count": 32,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "                            OLS Regression Results                            \n",
+            "==============================================================================\n",
+            "Dep. Variable:                     ER   R-squared:                       0.547\n",
+            "Model:                            OLS   Adj. R-squared:                  0.528\n",
+            "Method:                 Least Squares   F-statistic:                     13.81\n",
+            "Date:                Tue, 15 Sep 2026   Prob (F-statistic):           1.53e-10\n",
+            "Time:                        08:05:17   Log-Likelihood:                -296.05\n",
+            "No. Observations:                 120   AIC:                             604.1\n",
+            "Df Residuals:                     114   BIC:                             620.8\n",
+            "Df Model:                           5                                         \n",
+            "Covariance Type:                  HAC                                         \n",
+            "================================================================================================================================\n",
+            "                                                                   coef    std err          z      P>|z|      [0.025      0.975]\n",
+            "--------------------------------------------------------------------------------------------------------------------------------\n",
+            "Intercept                                                        0.6329      0.442      1.432      0.152      -0.233       1.499\n",
+            "C(sector, Treatment(reference=\"Industrial\"))[T.Office]          -0.9901      0.583     -1.700      0.089      -2.132       0.152\n",
+            "C(sector, Treatment(reference=\"Industrial\"))[T.Retail]          -0.4580      0.716     -0.640      0.522      -1.861       0.945\n",
+            "ER_L1                                                            0.6669      0.174      3.839      0.000       0.326       1.007\n",
+            "ER_L1:C(sector, Treatment(reference=\"Industrial\"))[T.Office]     0.0013      0.230      0.006      0.995      -0.450       0.453\n",
+            "ER_L1:C(sector, Treatment(reference=\"Industrial\"))[T.Retail]     0.0940      0.225      0.417      0.676      -0.347       0.535\n",
+            "==============================================================================\n",
+            "Omnibus:                        9.344   Durbin-Watson:                   1.546\n",
+            "Prob(Omnibus):                  0.009   Jarque-Bera (JB):               17.813\n",
+            "Skew:                           0.232   Prob(JB):                     0.000136\n",
+            "Kurtosis:                       4.830   Cond. No.                         17.2\n",
+            "==============================================================================\n",
+            "\n",
+            "Notes:\n",
+            "[1] Standard Errors are heteroscedasticity and autocorrelation robust (HAC) using 1 lags and without small sample correction\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "office_term = [\n",
+        "    name for name in h2_model.params.index\n",
+        "    if \"ER_L1:\" in name and \"Office\" in name\n",
+        "][0]\n",
+        "\n",
+        "retail_term = [\n",
+        "    name for name in h2_model.params.index\n",
+        "    if \"ER_L1:\" in name and \"Retail\" in name\n",
+        "][0]\n",
+        "\n",
+        "retail_vs_office = h2_model.t_test(\n",
+        "    f'{retail_term} - {office_term} = 0'\n",
+        ")\n",
+        "\n",
+        "print(retail_vs_office)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "cozemYn4GU7k",
+        "outputId": "fff31aca-2a51-443a-8aa2-3a7b7c49deaa"
+      },
+      "execution_count": 33,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "                             Test for Constraints                             \n",
+            "==============================================================================\n",
+            "                 coef    std err          z      P>|z|      [0.025      0.975]\n",
+            "------------------------------------------------------------------------------\n",
+            "c0             0.0927      0.208      0.445      0.656      -0.315       0.501\n",
+            "==============================================================================\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from statsmodels.stats.diagnostic import acorr_ljungbox\n",
+        "\n",
+        "ljung_box = acorr_ljungbox(\n",
+        "    h2_model.resid,\n",
+        "    lags=[1, 2, 3, 4],\n",
+        "    return_df=True\n",
+        ")\n",
+        "\n",
+        "print(ljung_box.round(4))"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "EDr2qMAxGbD8",
+        "outputId": "79beaf38-77e7-41bf-cc90-2b28abacbb47"
+      },
+      "execution_count": 34,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "   lb_stat  lb_pvalue\n",
+            "1   6.1018     0.0135\n",
+            "2   8.0207     0.0181\n",
+            "3   8.0319     0.0454\n",
+            "4  18.4402     0.0010\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "for bandwidth in [1, 2, 3]:\n",
+        "\n",
+        "    robust_model = smf.ols(\n",
+        "        \"\"\"\n",
+        "        ER ~ C(sector, Treatment(reference=\"Industrial\"))\n",
+        "           + ER_L1\n",
+        "           + ER_L1:C(sector, Treatment(reference=\"Industrial\"))\n",
+        "        \"\"\",\n",
+        "        data=annual_panel\n",
+        "    ).fit(\n",
+        "        cov_type=\"HAC\",\n",
+        "        cov_kwds={\"maxlags\": bandwidth}\n",
+        "    )\n",
+        "\n",
+        "    print(f\"\\nHAC bandwidth: {bandwidth}\")\n",
+        "    print(\n",
+        "        robust_model.params.to_frame(\"Coefficient\")\n",
+        "        .join(robust_model.pvalues.to_frame(\"p-value\"))\n",
+        "        .round(4)\n",
+        "    )\n",
+        "``"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 106
+        },
+        "id": "EsEtJCrDGiZq",
+        "outputId": "9fa13eaa-94f9-4718-befa-c04333e60407"
+      },
+      "execution_count": 35,
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "SyntaxError",
+          "evalue": "invalid syntax (2597615754.py, line 21)",
+          "traceback": [
+            "\u001b[0;36m  File \u001b[0;32m\"/tmp/ipykernel_2554/2597615754.py\"\u001b[0;36m, line \u001b[0;32m21\u001b[0m\n\u001b[0;31m    ``\u001b[0m\n\u001b[0m    ^\u001b[0m\n\u001b[0;31mSyntaxError\u001b[0m\u001b[0;31m:\u001b[0m invalid syntax\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "for bandwidth in [1, 2, 3]:\n",
+        "\n",
+        "    robust_model = smf.ols(\n",
+        "        \"\"\"\n",
+        "        ER ~ C(sector, Treatment(reference=\"Industrial\"))\n",
+        "           + ER_L1\n",
+        "           + ER_L1:C(sector, Treatment(reference=\"Industrial\"))\n",
+        "        \"\"\",\n",
+        "        data=annual_panel\n",
+        "    ).fit(\n",
+        "        cov_type=\"HAC\",\n",
+        "        cov_kwds={\"maxlags\": bandwidth}\n",
+        "    )\n",
+        "\n",
+        "    print(f\"\\nHAC bandwidth: {bandwidth}\")\n",
+        "    print(\n",
+        "        robust_model.params.to_frame(\"Coefficient\")\n",
+        "        .join(robust_model.pvalues.to_frame(\"p-value\"))\n",
+        "        .round(4)\n",
+        "    )"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "mEq6lakTGl85",
+        "outputId": "63c715dd-bd46-40e7-fbcc-c9fdf97eff62"
+      },
+      "execution_count": 36,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "\n",
+            "HAC bandwidth: 1\n",
+            "                                                    Coefficient  p-value\n",
+            "Intercept                                                0.6329   0.1520\n",
+            "C(sector, Treatment(reference=\"Industrial\"))[T....      -0.9901   0.0892\n",
+            "C(sector, Treatment(reference=\"Industrial\"))[T....      -0.4580   0.5223\n",
+            "ER_L1                                                    0.6669   0.0001\n",
+            "ER_L1:C(sector, Treatment(reference=\"Industrial...       0.0013   0.9955\n",
+            "ER_L1:C(sector, Treatment(reference=\"Industrial...       0.0940   0.6763\n",
+            "\n",
+            "HAC bandwidth: 2\n",
+            "                                                    Coefficient  p-value\n",
+            "Intercept                                                0.6329   0.1697\n",
+            "C(sector, Treatment(reference=\"Industrial\"))[T....      -0.9901   0.0983\n",
+            "C(sector, Treatment(reference=\"Industrial\"))[T....      -0.4580   0.5361\n",
+            "ER_L1                                                    0.6669   0.0000\n",
+            "ER_L1:C(sector, Treatment(reference=\"Industrial...       0.0013   0.9947\n",
+            "ER_L1:C(sector, Treatment(reference=\"Industrial...       0.0940   0.6285\n",
+            "\n",
+            "HAC bandwidth: 3\n",
+            "                                                    Coefficient  p-value\n",
+            "Intercept                                                0.6329   0.1894\n",
+            "C(sector, Treatment(reference=\"Industrial\"))[T....      -0.9901   0.1054\n",
+            "C(sector, Treatment(reference=\"Industrial\"))[T....      -0.4580   0.5351\n",
+            "ER_L1                                                    0.6669   0.0000\n",
+            "ER_L1:C(sector, Treatment(reference=\"Industrial...       0.0013   0.9938\n",
+            "ER_L1:C(sector, Treatment(reference=\"Industrial...       0.0940   0.5777\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "annual_panel = (\n",
+        "    df[df[\"quarter_end\"].dt.month == 12]\n",
+        "    .copy()\n",
+        "    .sort_values(\n",
+        "        [\"sector\",\"quarter_end\"]\n",
+        "    )\n",
+        ")\n",
+        "\n",
+        "annual_panel[\"ER_L1\"] = (\n",
+        "    annual_panel.groupby(\"sector\")[\"ER\"]\n",
+        "    .shift(1)\n",
+        ")\n",
+        "\n",
+        "annual_panel[\"IR_L1\"] = (\n",
+        "    annual_panel.groupby(\"sector\")[\"income_return\"]\n",
+        "    .shift(1)\n",
+        ")\n",
+        "\n",
+        "annual_panel[\"CR_L1\"] = (\n",
+        "    annual_panel.groupby(\"sector\")[\"capital_return\"]\n",
+        "    .shift(1)\n",
+        ")\n",
+        "\n",
+        "annual_panel = annual_panel.dropna()"
+      ],
+      "metadata": {
+        "id": "xgnFDuviGnWo"
+      },
+      "execution_count": 37,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import statsmodels.formula.api as smf\n",
+        "\n",
+        "return_model = smf.ols(\n",
+        "    \"\"\"\n",
+        "    ER ~ ER_L1\n",
+        "         + IR_L1\n",
+        "         + CR_L1\n",
+        "    \"\"\",\n",
+        "    data=annual_panel\n",
+        ").fit(\n",
+        "    cov_type=\"HAC\",\n",
+        "    cov_kwds={\"maxlags\":1}\n",
+        ")\n",
+        "\n",
+        "print(return_model.summary())"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "YMR8-c_cGzxA",
+        "outputId": "0762e19a-cc6c-475b-d388-2f168a512d09"
+      },
+      "execution_count": 38,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "                            OLS Regression Results                            \n",
+            "==============================================================================\n",
+            "Dep. Variable:                     ER   R-squared:                       0.467\n",
+            "Model:                            OLS   Adj. R-squared:                  0.450\n",
+            "Method:                 Least Squares   F-statistic:                     11.67\n",
+            "Date:                Tue, 15 Sep 2026   Prob (F-statistic):           1.51e-06\n",
+            "Time:                        08:07:35   Log-Likelihood:                -229.84\n",
+            "No. Observations:                  96   AIC:                             467.7\n",
+            "Df Residuals:                      92   BIC:                             477.9\n",
+            "Df Model:                           3                                         \n",
+            "Covariance Type:                  HAC                                         \n",
+            "==============================================================================\n",
+            "                 coef    std err          z      P>|z|      [0.025      0.975]\n",
+            "------------------------------------------------------------------------------\n",
+            "Intercept     -1.1066      1.695     -0.653      0.514      -4.429       2.216\n",
+            "ER_L1          0.6751      0.143      4.720      0.000       0.395       0.955\n",
+            "IR_L1          0.1964      0.211      0.929      0.353      -0.218       0.611\n",
+            "CR_L1         -0.0519      0.057     -0.913      0.361      -0.163       0.060\n",
+            "==============================================================================\n",
+            "Omnibus:                       21.401   Durbin-Watson:                   1.662\n",
+            "Prob(Omnibus):                  0.000   Jarque-Bera (JB):               59.190\n",
+            "Skew:                           0.696   Prob(JB):                     1.40e-13\n",
+            "Kurtosis:                       6.586   Cond. No.                         41.1\n",
+            "==============================================================================\n",
+            "\n",
+            "Notes:\n",
+            "[1] Standard Errors are heteroscedasticity and autocorrelation robust (HAC) using 1 lags and without small sample correction\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "annual_panel[\"CAP_L1\"] = (\n",
+        "    annual_panel.groupby(\"sector\")[\"cap_rate\"]\n",
+        "    .shift(1)\n",
+        ")\n",
+        "\n",
+        "annual_panel[\"DISC_L1\"] = (\n",
+        "    annual_panel.groupby(\"sector\")[\"discount_rate\"]\n",
+        "    .shift(1)\n",
+        ")\n",
+        "\n",
+        "annual_panel = annual_panel.dropna()"
+      ],
+      "metadata": {
+        "id": "NsyV4dMQG2ni"
+      },
+      "execution_count": 39,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "valuation_model = smf.ols(\n",
+        "    \"\"\"\n",
+        "    ER ~ ER_L1\n",
+        "         + CAP_L1\n",
+        "         + DISC_L1\n",
+        "    \"\"\",\n",
+        "    data=annual_panel\n",
+        ").fit(\n",
+        "    cov_type=\"HAC\",\n",
+        "    cov_kwds={\"maxlags\":1}\n",
+        ")\n",
+        "\n",
+        "print(valuation_model.summary())"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "TRFtiQdpG7LS",
+        "outputId": "acdd7af5-057e-4a10-ceec-8ecf7052a4c9"
+      },
+      "execution_count": 40,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "                            OLS Regression Results                            \n",
+            "==============================================================================\n",
+            "Dep. Variable:                     ER   R-squared:                       0.503\n",
+            "Model:                            OLS   Adj. R-squared:                  0.486\n",
+            "Method:                 Least Squares   F-statistic:                     15.35\n",
+            "Date:                Tue, 15 Sep 2026   Prob (F-statistic):           3.96e-08\n",
+            "Time:                        08:07:59   Log-Likelihood:                -220.45\n",
+            "No. Observations:                  93   AIC:                             448.9\n",
+            "Df Residuals:                      89   BIC:                             459.0\n",
+            "Df Model:                           3                                         \n",
+            "Covariance Type:                  HAC                                         \n",
+            "==============================================================================\n",
+            "                 coef    std err          z      P>|z|      [0.025      0.975]\n",
+            "------------------------------------------------------------------------------\n",
+            "Intercept     -0.6220      1.773     -0.351      0.726      -4.097       2.853\n",
+            "ER_L1          0.6985      0.127      5.503      0.000       0.450       0.947\n",
+            "CAP_L1         0.4697      0.251      1.868      0.062      -0.023       0.962\n",
+            "DISC_L1       -0.2832      0.206     -1.377      0.169      -0.686       0.120\n",
+            "==============================================================================\n",
+            "Omnibus:                       18.563   Durbin-Watson:                   1.712\n",
+            "Prob(Omnibus):                  0.000   Jarque-Bera (JB):               53.921\n",
+            "Skew:                           0.562   Prob(JB):                     1.96e-12\n",
+            "Kurtosis:                       6.557   Cond. No.                         58.1\n",
+            "==============================================================================\n",
+            "\n",
+            "Notes:\n",
+            "[1] Standard Errors are heteroscedasticity and autocorrelation robust (HAC) using 1 lags and without small sample correction\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from statsmodels.stats.outliers_influence import variance_inflation_factor\n",
+        "\n",
+        "X = annual_panel[\n",
+        "    [\n",
+        "        \"ER_L1\",\n",
+        "        \"CAP_L1\",\n",
+        "        \"DISC_L1\"\n",
+        "    ]\n",
+        "]\n",
+        "\n",
+        "vif = pd.DataFrame()\n",
+        "\n",
+        "vif[\"Variable\"] = X.columns\n",
+        "\n",
+        "vif[\"VIF\"] = [\n",
+        "    variance_inflation_factor(\n",
+        "        X.values,\n",
+        "        i\n",
+        "    )\n",
+        "    for i in range(X.shape[1])\n",
+        "]\n",
+        "\n",
+        "print(vif)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "ZgJXq8jLG8kf",
+        "outputId": "104d8a36-5ff4-4830-8311-933fe74a7de7"
+      },
+      "execution_count": 41,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "  Variable       VIF\n",
+            "0    ER_L1  1.001484\n",
+            "1   CAP_L1  5.176718\n",
+            "2  DISC_L1  5.174097\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "conditions = [\n",
+        "    (\n",
+        "        (df[\"quarter_end\"] >= \"2020-01-01\")\n",
+        "        &\n",
+        "        (df[\"quarter_end\"] <= \"2021-12-31\")\n",
+        "    ),\n",
+        "\n",
+        "    (\n",
+        "        df[\"quarter_end\"] >= \"2022-01-01\"\n",
+        "    )\n",
+        "]\n",
+        "\n",
+        "choices = [\n",
+        "    \"COVID\",\n",
+        "    \"Rate Shock\"\n",
+        "]\n",
+        "\n",
+        "df[\"regime\"] = np.select(\n",
+        "    conditions,\n",
+        "    choices,\n",
+        "    default=np.nan\n",
+        ")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 367
+        },
+        "id": "XHdd8f4dHCL4",
+        "outputId": "9f4223d2-63af-4b8a-abea-116e6f68bfb3"
+      },
+      "execution_count": 42,
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "TypeError",
+          "evalue": "Choicelist and default value do not have a common dtype: The DType <class 'numpy.dtypes._PyFloatDType'> could not be promoted by <class 'numpy.dtypes.StrDType'>. This means that no common DType exists for the given inputs. For example they cannot be stored in a single array unless the dtype is `object`. The full list of DTypes is: (<class 'numpy.dtypes.StrDType'>, <class 'numpy.dtypes.StrDType'>, <class 'numpy.dtypes._PyFloatDType'>)",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mTypeError\u001b[0m                                 Traceback (most recent call last)",
+            "\u001b[0;32m/tmp/ipykernel_2554/3994259009.py\u001b[0m in \u001b[0;36m<cell line: 0>\u001b[0;34m()\u001b[0m\n\u001b[1;32m     16\u001b[0m ]\n\u001b[1;32m     17\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m---> 18\u001b[0;31m df[\"regime\"] = np.select(\n\u001b[0m\u001b[1;32m     19\u001b[0m     \u001b[0mconditions\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     20\u001b[0m     \u001b[0mchoices\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/usr/local/lib/python3.13/dist-packages/numpy/lib/_function_base_impl.py\u001b[0m in \u001b[0;36mselect\u001b[0;34m(condlist, choicelist, default)\u001b[0m\n\u001b[1;32m    869\u001b[0m     \u001b[0;32mexcept\u001b[0m \u001b[0mTypeError\u001b[0m \u001b[0;32mas\u001b[0m \u001b[0me\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    870\u001b[0m         \u001b[0mmsg\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0;34mf'Choicelist and default value do not have a common dtype: {e}'\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--> 871\u001b[0;31m         \u001b[0;32mraise\u001b[0m \u001b[0mTypeError\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mmsg\u001b[0m\u001b[0;34m)\u001b[0m \u001b[0;32mfrom\u001b[0m \u001b[0;32mNone\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m    872\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    873\u001b[0m     \u001b[0;31m# Convert conditions to arrays and broadcast conditions and choices\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;31mTypeError\u001b[0m: Choicelist and default value do not have a common dtype: The DType <class 'numpy.dtypes._PyFloatDType'> could not be promoted by <class 'numpy.dtypes.StrDType'>. This means that no common DType exists for the given inputs. For example they cannot be stored in a single array unless the dtype is `object`. The full list of DTypes is: (<class 'numpy.dtypes.StrDType'>, <class 'numpy.dtypes.StrDType'>, <class 'numpy.dtypes._PyFloatDType'>)"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "conditions = [\n",
+        "    (\n",
+        "        (df[\"quarter_end\"] >= \"2020-01-01\")\n",
+        "        &\n",
+        "        (df[\"quarter_end\"] <= \"2021-12-31\")\n",
+        "    ),\n",
+        "\n",
+        "    (\n",
+        "        df[\"quarter_end\"] >= \"2022-01-01\"\n",
+        "    )\n",
+        "]\n",
+        "\n",
+        "choices = [\n",
+        "    \"COVID\",\n",
+        "    \"Rate Shock\"\n",
+        "]\n",
+        "\n",
+        "df[\"regime\"] = np.select(\n",
+        "    conditions,\n",
+        "    choices,\n",
+        "    default=np.nan\n",
+        ")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 367
+        },
+        "id": "-LIq3Ns6HGz5",
+        "outputId": "f836ddb2-f154-4d1d-d058-58b7a6850e65"
+      },
+      "execution_count": 43,
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "TypeError",
+          "evalue": "Choicelist and default value do not have a common dtype: The DType <class 'numpy.dtypes._PyFloatDType'> could not be promoted by <class 'numpy.dtypes.StrDType'>. This means that no common DType exists for the given inputs. For example they cannot be stored in a single array unless the dtype is `object`. The full list of DTypes is: (<class 'numpy.dtypes.StrDType'>, <class 'numpy.dtypes.StrDType'>, <class 'numpy.dtypes._PyFloatDType'>)",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mTypeError\u001b[0m                                 Traceback (most recent call last)",
+            "\u001b[0;32m/tmp/ipykernel_2554/3994259009.py\u001b[0m in \u001b[0;36m<cell line: 0>\u001b[0;34m()\u001b[0m\n\u001b[1;32m     16\u001b[0m ]\n\u001b[1;32m     17\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m---> 18\u001b[0;31m df[\"regime\"] = np.select(\n\u001b[0m\u001b[1;32m     19\u001b[0m     \u001b[0mconditions\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     20\u001b[0m     \u001b[0mchoices\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/usr/local/lib/python3.13/dist-packages/numpy/lib/_function_base_impl.py\u001b[0m in \u001b[0;36mselect\u001b[0;34m(condlist, choicelist, default)\u001b[0m\n\u001b[1;32m    869\u001b[0m     \u001b[0;32mexcept\u001b[0m \u001b[0mTypeError\u001b[0m \u001b[0;32mas\u001b[0m \u001b[0me\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    870\u001b[0m         \u001b[0mmsg\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0;34mf'Choicelist and default value do not have a common dtype: {e}'\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--> 871\u001b[0;31m         \u001b[0;32mraise\u001b[0m \u001b[0mTypeError\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mmsg\u001b[0m\u001b[0;34m)\u001b[0m \u001b[0;32mfrom\u001b[0m \u001b[0;32mNone\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m    872\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    873\u001b[0m     \u001b[0;31m# Convert conditions to arrays and broadcast conditions and choices\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;31mTypeError\u001b[0m: Choicelist and default value do not have a common dtype: The DType <class 'numpy.dtypes._PyFloatDType'> could not be promoted by <class 'numpy.dtypes.StrDType'>. This means that no common DType exists for the given inputs. For example they cannot be stored in a single array unless the dtype is `object`. The full list of DTypes is: (<class 'numpy.dtypes.StrDType'>, <class 'numpy.dtypes.StrDType'>, <class 'numpy.dtypes._PyFloatDType'>)"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "valuation_model = smf.ols(\n",
+        "    \"\"\"\n",
+        "    ER ~ ER_L1\n",
+        "         + CAP_L1\n",
+        "         + DISC_L1\n",
+        "    \"\"\",\n",
+        "    data=annual_panel\n",
+        ").fit(\n",
+        "    cov_type=\"HAC\",\n",
+        "    cov_kwds={\"maxlags\":1}\n",
+        ")\n",
+        "\n",
+        "print(valuation_model.summary())"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "qMnL1yjwHIrY",
+        "outputId": "4b264bb5-04b5-4116-8849-098bc8051851"
+      },
+      "execution_count": 44,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "                            OLS Regression Results                            \n",
+            "==============================================================================\n",
+            "Dep. Variable:                     ER   R-squared:                       0.503\n",
+            "Model:                            OLS   Adj. R-squared:                  0.486\n",
+            "Method:                 Least Squares   F-statistic:                     15.35\n",
+            "Date:                Tue, 15 Sep 2026   Prob (F-statistic):           3.96e-08\n",
+            "Time:                        08:09:05   Log-Likelihood:                -220.45\n",
+            "No. Observations:                  93   AIC:                             448.9\n",
+            "Df Residuals:                      89   BIC:                             459.0\n",
+            "Df Model:                           3                                         \n",
+            "Covariance Type:                  HAC                                         \n",
+            "==============================================================================\n",
+            "                 coef    std err          z      P>|z|      [0.025      0.975]\n",
+            "------------------------------------------------------------------------------\n",
+            "Intercept     -0.6220      1.773     -0.351      0.726      -4.097       2.853\n",
+            "ER_L1          0.6985      0.127      5.503      0.000       0.450       0.947\n",
+            "CAP_L1         0.4697      0.251      1.868      0.062      -0.023       0.962\n",
+            "DISC_L1       -0.2832      0.206     -1.377      0.169      -0.686       0.120\n",
+            "==============================================================================\n",
+            "Omnibus:                       18.563   Durbin-Watson:                   1.712\n",
+            "Prob(Omnibus):                  0.000   Jarque-Bera (JB):               53.921\n",
+            "Skew:                           0.562   Prob(JB):                     1.96e-12\n",
+            "Kurtosis:                       6.557   Cond. No.                         58.1\n",
+            "==============================================================================\n",
+            "\n",
+            "Notes:\n",
+            "[1] Standard Errors are heteroscedasticity and autocorrelation robust (HAC) using 1 lags and without small sample correction\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "office = df[\n",
+        "    df[\"sector\"] == \"Office\"\n",
+        "].copy()\n",
+        "\n",
+        "office[\"regime\"] = np.where(\n",
+        "    office[\"quarter_end\"] <= \"2021-12-31\",\n",
+        "    \"COVID\",\n",
+        "    np.where(\n",
+        "        office[\"quarter_end\"] >= \"2022-01-01\",\n",
+        "        \"Rate Shock\",\n",
+        "        np.nan\n",
+        "    )\n",
+        ")\n",
+        "\n",
+        "office = office[\n",
+        "    office[\"regime\"].isin(\n",
+        "        [\"COVID\",\"Rate Shock\"]\n",
+        "    )\n",
+        "]\n",
+        "\n",
+        "h4_table = office.groupby(\n",
+        "    \"regime\"\n",
+        ")[\n",
+        "    [\n",
+        "        \"ER\",\n",
+        "        \"income_return\",\n",
+        "        \"capital_return\",\n",
+        "        \"cap_rate\",\n",
+        "        \"discount_rate\"\n",
+        "    ]\n",
+        "].mean()\n",
+        "\n",
+        "print(h4_table.round(2))"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 228
+        },
+        "id": "Y1KpfQU_HMpb",
+        "outputId": "9fb8f838-16f0-4bbe-a484-20e0436d3431"
+      },
+      "execution_count": 45,
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "DTypePromotionError",
+          "evalue": "The DType <class 'numpy.dtypes.StrDType'> could not be promoted by <class 'numpy.dtypes._PyFloatDType'>. This means that no common DType exists for the given inputs. For example they cannot be stored in a single array unless the dtype is `object`. The full list of DTypes is: (<class 'numpy.dtypes.StrDType'>, <class 'numpy.dtypes._PyFloatDType'>)",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mDTypePromotionError\u001b[0m                       Traceback (most recent call last)",
+            "\u001b[0;32m/tmp/ipykernel_2554/813973476.py\u001b[0m in \u001b[0;36m<cell line: 0>\u001b[0;34m()\u001b[0m\n\u001b[1;32m      6\u001b[0m     \u001b[0moffice\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0;34m\"quarter_end\"\u001b[0m\u001b[0;34m]\u001b[0m \u001b[0;34m<=\u001b[0m \u001b[0;34m\"2021-12-31\"\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      7\u001b[0m     \u001b[0;34m\"COVID\"\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m----> 8\u001b[0;31m     np.where(\n\u001b[0m\u001b[1;32m      9\u001b[0m         \u001b[0moffice\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0;34m\"quarter_end\"\u001b[0m\u001b[0;34m]\u001b[0m \u001b[0;34m>=\u001b[0m \u001b[0;34m\"2022-01-01\"\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     10\u001b[0m         \u001b[0;34m\"Rate Shock\"\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;31mDTypePromotionError\u001b[0m: The DType <class 'numpy.dtypes.StrDType'> could not be promoted by <class 'numpy.dtypes._PyFloatDType'>. This means that no common DType exists for the given inputs. For example they cannot be stored in a single array unless the dtype is `object`. The full list of DTypes is: (<class 'numpy.dtypes.StrDType'>, <class 'numpy.dtypes._PyFloatDType'>)"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "office = df[df[\"sector\"] == \"Office\"].copy()\n",
+        "\n",
+        "office[\"regime\"] = \"Pre-COVID\"\n",
+        "\n",
+        "office.loc[\n",
+        "    office[\"quarter_end\"].between(\n",
+        "        \"2020-01-01\",\n",
+        "        \"2021-12-31\"\n",
+        "    ),\n",
+        "    \"regime\"\n",
+        "] = \"COVID\"\n",
+        "\n",
+        "office.loc[\n",
+        "    office[\"quarter_end\"] >= \"2022-01-01\",\n",
+        "    \"regime\"\n",
+        "] = \"Rate Shock\"\n",
+        "``"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 106
+        },
+        "id": "JUkluvFJHU8Y",
+        "outputId": "4451d5df-43a7-489d-975c-759fce488693"
+      },
+      "execution_count": 46,
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "SyntaxError",
+          "evalue": "invalid syntax (3426456718.py, line 17)",
+          "traceback": [
+            "\u001b[0;36m  File \u001b[0;32m\"/tmp/ipykernel_2554/3426456718.py\"\u001b[0;36m, line \u001b[0;32m17\u001b[0m\n\u001b[0;31m    ``\u001b[0m\n\u001b[0m    ^\u001b[0m\n\u001b[0;31mSyntaxError\u001b[0m\u001b[0;31m:\u001b[0m invalid syntax\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "office = df[df[\"sector\"] == \"Office\"].copy()\n",
+        "\n",
+        "office[\"regime\"] = \"Pre-COVID\"\n",
+        "\n",
+        "office.loc[\n",
+        "    office[\"quarter_end\"].between(\n",
+        "        \"2020-01-01\",\n",
+        "        \"2021-12-31\"\n",
+        "    ),\n",
+        "    \"regime\"\n",
+        "] = \"COVID\"\n",
+        "\n",
+        "office.loc[\n",
+        "    office[\"quarter_end\"] >= \"2022-01-01\",\n",
+        "    \"regime\"\n",
+        "] = \"Rate Shock\""
+      ],
+      "metadata": {
+        "id": "PuIyzeN-HaHR"
+      },
+      "execution_count": 47,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "h4_table = (\n",
+        "    office[\n",
+        "        office[\"regime\"].isin(\n",
+        "            [\"COVID\", \"Rate Shock\"]\n",
+        "        )\n",
+        "    ]\n",
+        "    .groupby(\"regime\")\n",
+        "    [\n",
+        "        [\n",
+        "            \"ER\",\n",
+        "            \"income_return\",\n",
+        "            \"capital_return\",\n",
+        "            \"cap_rate\",\n",
+        "            \"discount_rate\"\n",
+        "        ]\n",
+        "    ]\n",
+        "    .mean()\n",
+        ")\n",
+        "\n",
+        "print(h4_table.round(2))"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "7MB8P0CxHbkD",
+        "outputId": "69f7a3c1-471b-47a3-b04d-90b281d5e370"
+      },
+      "execution_count": 48,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "              ER  income_return  capital_return  cap_rate  discount_rate\n",
+            "regime                                                                  \n",
+            "COVID       1.86           4.94            2.53      5.01           6.24\n",
+            "Rate Shock -3.64           4.94           -4.53      5.57           6.57\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import pandas as pd\n",
+        "import matplotlib.pyplot as plt\n",
+        "\n",
+        "# Results\n",
+        "results = pd.DataFrame({\n",
+        "    \"Sector\": [\"Industrial\", \"Office\", \"Retail\"],\n",
+        "    \"AR1\": [0.6669, 0.6682, 0.7609],\n",
+        "    \"HalfLife\": [1.71, 1.72, 2.54]\n",
+        "})\n",
+        "\n",
+        "# Figure style consistent with dissertation\n",
+        "fig, axes = plt.subplots(\n",
+        "    1,\n",
+        "    2,\n",
+        "    figsize=(10,5)\n",
+        ")\n",
+        "\n",
+        "# Panel A\n",
+        "axes[0].bar(\n",
+        "    results[\"Sector\"],\n",
+        "    results[\"AR1\"],\n",
+        "    color=\"#1f77b4\"\n",
+        ")\n",
+        "\n",
+        "axes[0].set_title(\n",
+        "    \"Panel A. AR(1) Persistence Estimates\"\n",
+        ")\n",
+        "\n",
+        "axes[0].set_ylabel(\n",
+        "    \"AR(1) Coefficient\"\n",
+        ")\n",
+        "\n",
+        "axes[0].set_ylim(0,1)\n",
+        "\n",
+        "for i,v in enumerate(results[\"AR1\"]):\n",
+        "    axes[0].text(\n",
+        "        i,\n",
+        "        v+0.02,\n",
+        "        f\"{v:.3f}\",\n",
+        "        ha=\"center\"\n",
+        "    )\n",
+        "\n",
+        "# Panel B\n",
+        "axes[1].bar(\n",
+        "    results[\"Sector\"],\n",
+        "    results[\"HalfLife\"],\n",
+        "    color=\"#2ca02c\"\n",
+        ")\n",
+        "\n",
+        "axes[1].set_title(\n",
+        "    \"Panel B. Shock Half-Life\"\n",
+        ")\n",
+        "\n",
+        "axes[1].set_ylabel(\n",
+        "    \"Years\"\n",
+        ")\n",
+        "\n",
+        "for i,v in enumerate(results[\"HalfLife\"]):\n",
+        "    axes[1].text(\n",
+        "        i,\n",
+        "        v+0.05,\n",
+        "        f\"{v:.2f}\",\n",
+        "        ha=\"center\"\n",
+        "    )\n",
+        "\n",
+        "plt.suptitle(\n",
+        "    \"Figure 4.4. Persistence in Sector Excess Returns\"\n",
+        ")\n",
+        "\n",
+        "plt.tight_layout()\n",
+        "\n",
+        "plt.savefig(\n",
+        "    \"Figure_4_4_Persistence.png\",\n",
+        "    dpi=300,\n",
+        "    bbox_inches=\"tight\"\n",
+        ")\n",
+        "\n",
+        "plt.show()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 512
+        },
+        "id": "HEJfFG6yHde7",
+        "outputId": "637b6ab8-f022-4710-a163-70758aeecfcb"
+      },
+      "execution_count": 49,
+      "outputs": [
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<Figure size 1000x500 with 2 Axes>"
+            ],
+            "image/png": "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RsOGDVPdBqntjyNHjrSoW7lyZSMwMDDV+RmGYXTq1MmQZHh4eBitWrUyxo8fbxw6dChJPWs/57Vr1xqSjH79+iWZx/3rnCtXLqNz585J6rRs2dJwdHQ0Tpw4YS7777//DFdXV6NOnTrmssTPpVatWsbdu3cfup6J2y6l19atW811o6OjjeLFixtly5Y1bt++bTRt2tRwc3MzTp8+ba4za9YsQ5Lx6aefprie1h4TrNmX+/fvb7i5uVm1rg+SZHTv3t24ePGiceHCBWPHjh1G48aNkxwfvv32W8POzs7YtGmTRfvp06cbkow//vjDXJbS59e5c2eLY2uiYcOGmY/V98dlZ2dnHDhwwKLc2v85a7YbADxuuL0cwBNh6tSpWr16tcUrOf/995/27dunTp06KXfu3ObyoKAglS9f/pHjePAK4qJFi+Tu7q6GDRvq0qVL5ldgYKBy586tdevWpTq/o0ePavLkyRo3blyaOgtLNGfOHO3bt898FSyjHD58WJ6envL09FRAQIA+//xzNW3aVLNmzZJ0b71r164tDw8Pi/UODg5WfHy8Nm7caDG/1q1bm2/7TpQnTx79+++/+uuvv6yOK0+ePJKkX3/9VXfu3EnTOl25ckVr165V27ZtdePGDXPMly9fVkhIiI4dO6azZ89atHn99dct7h6oXbu24uPjdfr0aUn3rkTeuHFDQ4YMSfJMamK7PXv26NixY3rllVd0+fJl83Kjo6PVoEEDbdy4Md29widegb0/vn/++eeh7WbPnq0pU6bI399fS5Ys0TvvvKOAgAA1aNDAYhtY+zkvXrxYJpNJw4YNS7Ksh919ER8fr1WrVqlly5Z65plnzOUFCxbUK6+8os2bNysqKsqiTc+ePdP0rP/rr7+e5PixevVqlSlTxlzHxcVFc+bM0aFDh1SnTh0tW7ZMEydOVJEiRcx1Fi9erPz586tv374prqe1xwRr9uU8efIoOjo6xePdw3z99dfy9PSUl5eXqlSpojVr1mjQoEEKDQ0111m0aJECAgJUunRpi3jr168vSQ89hqVHUFCQxba/38P+5x7lGAAAWYXbywE8EapWrZpiR2r3S/xiVrx48STTihcvrl27dqU7hhw5ciR5fvTYsWO6fv16kudgE124cCHVefbv3181atRQ69at0xxPVFSUwsLC9O6778rX1zfN7VNTtGhRzZw5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D+4zD74WLFhg9bwe120zf/58vmwAeKjs8n0kueN63rx59fzzz2vevHmPNO99+/bp5Zdflp+fn3LmzCkfHx81bNhQn3/+eQZFnzUSf9AYP358stMTE+dLly5lyPJmzZqlcePG6eWXX9bcuXM1cODAFOum9weMgQMHauXKlQoLC9O3336rxo0bP0rIyMZyZHUAyFwjR46Uv7+/bt++rc2bN2vatGn67bfftH//frm4uGR1eGkyb948FS1aVKdOndLatWsVHBz8yPOMiorS//73PxUtWlTff/+9Pv744xSv0vbr10/PPfec7ty5o7///lvTp0/X+vXrtX//fnl7e1vUHTdunBo0aKDixYtblH/wwQfy9vZW5cqVtXLlyhTjqly5sqpUqaIJEybom2++sWpdKlWqpLffflvSvUTtyy+/1EsvvaRp06bpzTfftGoeGeGDDz7QkCFD0tTmv//+04gRI1S0aFFVqlTJNoFlgcR95kHVq1e3eh6pbZuZM2dm6A9QaTF//nzt379fAwYMyJLlA3iyZJfvI/cf1y9fvqyFCxfqtdde07Vr19S7d+80z2/Lli2qV6+eihQpop49e8rb21tnzpzRtm3bNHnyZPXt2zejVyHbWrt2rXx8fDRx4sQMmd+qVauSXUaLFi30zjvvZMgykH2RdD9lmjRpoipVqkiSevTooXz58unTTz/V0qVL1aFDhyyOznrR0dFaunSpwsPDNXv2bM2bNy9Dku7FixcrPj5es2bNUv369bVx40YFBQUlW7d27dp6+eWXze9LlSqlXr166ZtvvtGgQYPM5RcuXNCyZcs0ffr0JPM4efKkihYtqkuXLsnT0zPV2Nq2bathw4bpiy++UO7cuR+6Lj4+PnrttdfM7zt16qTixYtr4sSJj5x03759W46OjrKze/jNMjly5FCOHBxqpKT7TEZzcHCw2bwBICNll+8jDx7Xe/XqpWeeeUbz589PV9I9evRoubu766+//lKePHkspl24cOFRw32qXLhwIck2fBSOjo42XwayL24vf8rVr19f0r3kT5LGjx+vGjVqKF++fHJ2dlZgYGCyz+0k3obz888/q1y5cnJyclLZsmW1YsWKJHXPnj2rbt26qUCBAuZ6s2bNeqS4lyxZolu3bqlNmzZq3769fvrpJ92+ffuR5indu3resGFD1atXTwEBAWm6Rax27dqS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syW+goODFR8fr40bN2Z1iMgC3F7+lJk6dapKliypHDlyqECBAipVqpRFovHrr7/qo48+0p49eyyet0yuB+8iRYokKfPw8DAnvhcvXtS1a9c0Y8YMzZgxI9l40tMpSOKzt5cvX9bly5cl3evdOy4uTosWLdLrr7+e5nkeOnRIu3fvVqdOnXT8+HFzed26dTV16lRFRUXJzc3Nos3QoUNVu3Zt3bx5U0uWLDH/GJAcwzDSHFNK87F2zOtq1arpo48+kslkkouLiwICAsyJzYULF9L82fj7+yepM3LkSLVo0UIlS5ZUuXLl1LhxY3Xs2FEVKlRIMa527drpq6++Uo8ePTRkyBA1aNBAL730kl5++eWHdsyWmNx37tw5xTrXr1+3+JHjwf00cdrVq1fl5uamEydOyM7OTmXKlHnochMTxQc9uG+kpHz58ql2+Pco2yY1D26DxATc19c32fL7f7w6cOCAPvjgA61du9b8xSzR9evXH7rsY8eO6dChQyl2FJi4n9lq3QE8nrLD9xEp6XG9bdu2un79uoYMGaJXXnnloZ2kJue5557TTz/9pLi4OO3du1dLlizRxIkT9fLLL2vPnj0W5ytr1j0mJkalSpVKUi8gIEAJCQk6c+aMypYtqxMnTlhc0EjNgAEDdPv2be3evVtly5ZN0/qVKFEi2XPh5s2bk5RFRERo6NCh+uWXX5JcWLHmHHS/K1euKC4uzvze2dnZ4gfpjHLs2DH9/fffDz3v4elC0v2UqVq1qrm30Adt2rRJzZs3V506dfTFF1+oYMGCcnBw0OzZszV//vwk9e3t7ZOdT2KCmXi16rXXXksxSUotOUvOsWPH9Ndff0m6d9B+0Lx589KVdH/33XeS7o23mNw4josXL1bXrl0tyu4/0bZs2VIxMTHq2bOnatWqZZHM5MuX75GuwN/v6tWrya53cvLnz59igpeez+bBq9zSvWeaTpw4oaVLl2rVqlX66quvNHHiRE2fPl09evRIdr7Ozs7auHGj1q1bp2XLlmnFihVauHCh6tevr1WrVqW4X90f97hx41L8Vf3Bnt0ftp9aI3G53377bZLh4CRlWO/sj7JtUpNSu4dtm2vXrikoKEhubm4aOXKkihUrppw5c2rXrl0aPHiwVVekExISVL58eX366afJTk/8X7HVugN4PD3p30dS06BBA/3666/avn17kufP08LR0VHPPfecnnvuOZUsWVJdu3bVokWLNGzYMHOdjDjHpUeLFi20YMECffzxx/rmm29s8uNofHy8GjZsqCtXrmjw4MEqXbq0cuXKpbNnz6pLly5pvivqpZde0oYNG8zvO3fubNFJa0ZJSEhQw4YNLUayuV/JkiUzfJl4/JF0w2zx4sXKmTOnVq5cKScnJ3P57Nmz0zU/T09Pubq6Kj4+PkOG85LuJdUODg769ttvk5xoNm/erM8++0wRERHJ/vKbEsMwNH/+fNWrV09vvfVWkumjRo3SvHnzkiTdD/r444+1ZMkSjR492mJ4sNKlS2vx4sVWx5OSu3fv6syZM2revPkjzysjP5u8efOqa9eu6tq1q27evKk6depo+PDhKSbdkmRnZ6cGDRqoQYMG+vTTTzVmzBi9//77WrdunYKDg1O8mp94C52bm1uG7VPFihVTQkKCDh48mGIin7hcLy+vDFtuStK7bWxh/fr1unz5sn766SfVqVPHXH5/D/iJUvvM9u7dqwYNGjw09oetO4Cnw5PwfSQ1d+/elXSvY7KMkvgDxblz59LUztPTUy4uLjpy5EiSaYcPH5adnZ35x89ixYpp//79Vs23ZcuWatSokbp06SJXV1dNmzYtTXFZY9++fTp69Kjmzp1r0VFZekdxmTBhgsVFkEKFCj1yjMkpVqyYbt68yXkLFrhnD2b29vYymUwWQwGdOnXK3LtweubXunVrLV68ONmD+MWLF9M8z3nz5ql27dpq166dXn75ZYvXu+++K0n6/vvvzfUPHz6siIiIVOf5xx9/6NSpU+ratWuSeb788stq166d1q1bp//++y/V+RQrVkytW7fWnDlzFBkZaS6vXr26rl69an6+Kr0OHjyo27dvP7Snamtk1GeTeHt/oty5c6t48eJJhoK634NDUkkyJ7uJ7XLlyiXp3pXW+wUGBqpYsWIaP358sl9m0rNPtWzZUnZ2dho5cmSSX80TrxSEhITIzc1NY8aM0Z07dzJkucl5lG1jC4k/bN1/xSQuLk5ffPFFkrq5cuVK9la/tm3b6uzZs5o5c2aSabdu3VJ0dLQk69YdwNPhSfg+kppff/1VklSxYkVzWUREhFX9YKxbty7Zq9S//fabJCV7m3hq7O3t1ahRIy1dutQ8yop0rzf3+fPnq1atWuZHpFq3bm2+nf1BycXUqVMnffbZZ5o+fboGDx6cprisjf3BZRuGke7n5QMDAxUcHGx+pfZY2aNo27attm7dqpUrVyaZdu3aNfOPMni6cKUbZk2bNtWnn36qxo0b65VXXtGFCxc0depUFS9eXH///Xe65vnxxx9r3bp1qlatmnr27KkyZcroypUr2rVrl37//fdkv2in5M8//9Tx48fVp0+fZKf7+Pjo2Wef1bx588wH/4CAAAUFBaU6NuO8efNkb2+f4i1gzZs31/vvv68FCxYoNDQ01Rjfffdd/fDDD5o0aZI+/vhjSfe2a44cOfT7778nufX922+/1enTp83DZGzcuFEfffSRJKljx44Ww4ytXr1aLi4uKQ7FlVYZ8dmUKVNGdevWVWBgoPLmzasdO3boxx9/TPEzku49B75x40Y1bdpUfn5+unDhgr744gsVLlxYtWrVknTvB4w8efJo+vTpcnV1Va5cuVStWjX5+/vrq6++UpMmTVS2bFl17dpVPj4+Onv2rNatWyc3Nzf973//S9N2KF68uN5//32NGjVKtWvX1ksvvSQnJyf99ddfKlSokMLDw+Xm5qZp06apY8eOevbZZ9W+fXt5enoqIiJCy5YtU82aNTVlypSHLmvTpk3JjidfoUIF81BZj7JtMlqNGjXk4eGhzp07q1+/fjKZTPr222+T/fIVGBiohQsXKjQ0VM8995xy586tZs2aqWPHjvrhhx/05ptvat26dapZs6bi4+N1+PBh/fDDD1q5cqWqVKli1boDeDo87t9H7nf/cf3KlSv65ZdftGHDBrVv316lS5c21+vUqZM2bNjw0Nu++/btq5iYGLVq1UqlS5dWXFyctmzZooULF6po0aIPvesuOR999JFWr16tWrVq6a233lKOHDn05ZdfKjY2Vp988om53rvvvqsff/xRbdq0Ubdu3RQYGGhep+nTp1v8iJCoT58+ioqK0vvvvy93d3e99957aY4vJaVLl1axYsX0zjvv6OzZs3Jzc9PixYsz7JG9B+3YscP8Hex+devWTdN56N1339Uvv/yiF198UV26dFFgYKCio6O1b98+/fjjjzp16lSyw68hm8vEntKRhRKH6Pjrr79Srff1118bJUqUMJycnIzSpUsbs2fPTnYYBqUwtIKfn5/RuXNni7Lz588bvXv3Nnx9fQ0HBwfD29vbaNCggTFjxgxzHWuG6Ojbt68hyWLIiwcNHz7ckGTs3bvXHOeDwzvcLy4uzsiXL59Ru3btFOsYhmH4+/sblStXNgzDcriM5NStW9dwc3OzGKKpefPmRoMGDZLUDQoKSnHIjHXr1lnUrVatmvHaa6+lGmciPz+/hw7lZRjWfTapre9HH31kVK1a1ciTJ4/h7OxslC5d2hg9erTF0CYP7j9r1qwxWrRoYRQqVMhwdHQ0ChUqZHTo0CHJ0BpLly41ypQpY+TIkSPJvrF7927jpZdeMvLly2c4OTkZfn5+Rtu2bY01a9YkWe6DQ1Al/i+cPHnSonzWrFlG5cqVDScnJ8PDw8MICgoyVq9ebVFn3bp1RkhIiOHu7m7kzJnTKFasmNGlSxdjx44dqW7nhw0ZljhU3KNum5SGDBs3blyy8Tz4mSZ3nPjjjz+M559/3nB2djYKFSpkHr7mwX305s2bxiuvvGLkyZPHkGQRR1xcnDF27FijbNmy5u0bGBhojBgxwrh+/Xqa1h3Aky07fB8xjOSP646OjsmeBw3j/873D7N8+XKjW7duRunSpY3cuXMbjo6ORvHixY2+ffsa58+fT/e679q1ywgJCTFy585tuLi4GPXq1TO2bNmSpO3ly5eNPn36GD4+Poajo6NRuHBho3Pnzuah1lI6fwwaNMiQZEyZMiXFdUvpnJQoufP2wYMHjeDgYCN37txG/vz5jZ49e5qHRbv/M8qIIcNSeo0aNco8P2uGDDOMe0ONhoWFGcWLFzccHR2N/PnzGzVq1DDGjx+f7PBvyP5MhmHjnhYAaNOmTapbt64OHz5sdUdo99uzZ4+effZZ7dq1K03DcgAAAADIWiTdQCZp0qSJChcunOyzrQ/Tvn17JSQk6IcffrBBZAAAAABshaQbAAAAAAAbofdyAAAAAABsJEuT7o0bN6pZs2YqVKiQTCaTVUNBrF+/Xs8++6ycnJxUvHhxmwxqDwAAAABARsjSpDs6OloVK1bU1KlTrap/8uRJNW3aVPXq1dOePXs0YMAA9ejRI9lx8AAAAAAAyGqPzTPdJpNJS5YsUcuWLVOsM3jwYC1btkz79+83l7Vv317Xrl3TihUrMiFKAAAAAACslyOrA0iLrVu3Kjg42KIsJCREAwYMSLFNbGysYmNjze8TEhJ05coV5cuXTyaTyVahAgCQboZh6MaNGypUqJDs7J7e7lcSEhL033//ydXVlXM2AOCxY+35+olKuiMjI1WgQAGLsgIFCigqKkq3bt2Ss7Nzkjbh4eEaMWJEZoUIAECGOXPmjAoXLpzVYWSZ//77T76+vlkdBgAAqXrY+fqJSrrTIywsTKGhoeb3169fV5EiRXTmzBm5ubllYWQAACQvKipKvr6+cnV1zepQslTi+nPOBgA8jqw9Xz9RSbe3t7fOnz9vUXb+/Hm5ubkle5VbkpycnOTk5JSk3M3NjRM4AOCx9rTfUp24/pyzASB9wsPD9dNPP+nw4cNydnZWjRo1NHbsWJUqVSrFNnPmzFHXrl0typycnHT79u1k67/55pv68ssvNXHixFQf+83OHna+fqIeFKtevbrWrFljUbZ69WpVr149iyICAAAAgMfThg0b1Lt3b23btk2rV6/WnTt31KhRI0VHR6fazs3NTefOnTO/Tp8+nWy9JUuWaNu2bSpUqJAtws82svRK982bN3X8+HHz+5MnT2rPnj3KmzevihQporCwMJ09e1bffPONpHu/okyZMkWDBg1St27dtHbtWv3www9atmxZVq0CAAAAADyWHhzhac6cOfLy8tLOnTtVp06dFNuZTCZ5e3unOu+zZ8+qb9++WrlypZo2bZoh8WZXWXqle8eOHapcubIqV64sSQoNDVXlypU1dOhQSdK5c+cUERFhru/v769ly5Zp9erVqlixoiZMmKCvvvpKISEhWRI/AAAAADwprl+/LknKmzdvqvVu3rwpPz8/+fr6qkWLFjpw4IDF9ISEBHXs2FHvvvuuypYta7N4s4ssvdJdt25dpTZM+Jw5c5Jts3v3bhtGBQAAAADZS0JCggYMGKCaNWuqXLlyKdYrVaqUZs2apQoVKuj69esaP368atSooQMHDph76B47dqxy5Mihfv36ZVb4T7QnqiM1AAAAAEDa9e7dW/v379fmzZtTrVe9enWLPrNq1KihgIAAffnllxo1apR27typyZMna9euXU99h5/WeqI6UgMAAAAApE2fPn3066+/at26damOJ50cBwcHVa5c2dwX16ZNm3ThwgUVKVJEOXLkUI4cOXT69Gm9/fbbKlq0qA2if/JxpRsAAAAAsiHDMNS3b18tWbJE69evl7+/f5rnER8fr3379umFF16QJHXs2FHBwcEWdUJCQtSxY8ckQ43hHpJuAAAAAMiGevfurfnz52vp0qVydXVVZGSkJMnd3V3Ozs6SpE6d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\n"
+          },
+          "metadata": {}
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [],
+      "metadata": {
+        "id": "xxgiB41BM5p4"
+      },
+      "execution_count": null,
+      "outputs": []
+    }
+  ]
+}

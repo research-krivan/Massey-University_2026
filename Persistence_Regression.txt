@@ -1,0 +1,25 @@
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:          excess_return   R-squared:                       0.950
+Model:                            OLS   Adj. R-squared:                  0.949
+Method:                 Least Squares   F-statistic:                     1514.
+Date:                Tue, 14 Jul 2026   Prob (F-statistic):          1.12e-150
+Time:                        18:22:02   Log-Likelihood:                -654.49
+No. Observations:                 483   AIC:                             1313.
+Df Residuals:                     481   BIC:                             1321.
+Df Model:                           1                                         
+Covariance Type:                  HAC                                         
+==============================================================================
+                 coef    std err          z      P>|z|      [0.025      0.975]
+------------------------------------------------------------------------------
+const          0.0137      0.066      0.207      0.836      -0.116       0.143
+ER_L1          0.9742      0.025     38.908      0.000       0.925       1.023
+==============================================================================
+Omnibus:                       46.695   Durbin-Watson:                   0.756
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              239.043
+Skew:                          -0.168   Prob(JB):                     1.24e-52
+Kurtosis:                       6.430   Cond. No.                         4.25
+==============================================================================
+
+Notes:
+[1] Standard Errors are heteroscedasticity and autocorrelation robust (HAC) using 4 lags and without small sample correction
